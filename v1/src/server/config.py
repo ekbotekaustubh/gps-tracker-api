@@ -5,7 +5,7 @@ from urllib.parse import quote
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 # postgres_local_base = 'postgresql://postgres:@localhost/'
-database_name = 'flask_jwt_auth'
+database_name = 'gps_tracker'
 sqlite_db_base = 'sqlite:///.\\'
 
 
@@ -36,7 +36,7 @@ class ProductionConfig_MySQL(BaseConfig):
     """Production configuration."""
     SECRET_KEY = 'my_precious'
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'mysql+pymysql://root:toor@mysql:3306/test')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'mysql+pymysql://root:toor@mysql:3306/gps_tracker')
     #"mysql://s_ac:SerAditiControls\@123@akshaydandekar.in:3306/sac"
 
 

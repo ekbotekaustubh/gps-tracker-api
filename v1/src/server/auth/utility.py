@@ -1,6 +1,7 @@
-﻿from functools import wraps
-from flask import Blueprint, request, make_response, jsonify, 
+from functools import wraps
+from flask import request, make_response, jsonify, g
 from src.server.models import User
+
 
 def check_login(f):
     @wraps(f)
@@ -43,10 +44,3 @@ def check_login(f):
             return make_response(jsonify(responseObject)), 401
 
     return decorated_function
-
-# Example usage:
-@app.route('/protected', methods=['GET'])
-@check_login
-def protected():
-    return jsonify({'message': 'Hello, {}!'.format(g.user.username)})
-

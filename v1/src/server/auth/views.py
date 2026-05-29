@@ -15,15 +15,24 @@ from src.server import auth_ns
 auth_blueprint = Blueprint('auth', __name__)
 
 # Define Swagger models
-user_model = auth_ns.model('User', {
-    'fname': fields.String(required=True, description='First name'),
-    'lname': fields.String(required=True, description='Last name'),
+register_model = auth_ns.model('Register', {
+    'name': fields.String(required=True, description='Full name'),
     'email': fields.String(required=True, description='Email address'),
-    'password': fields.String(required=True, description='Password')
+    'mobile': fields.String(required=True, description='Mobile number'),
+    'branch_id': fields.Integer(required=True, description='Branch ID'),
+    'role_id': fields.Integer(required=True, description='Role ID'),
+    'country_id': fields.Integer(required=True, description='Country ID'),
+    'state_id': fields.Integer(required=True, description='State ID'),
+    'username': fields.String(required=True, description='Username'),
+    'password': fields.String(required=True, description='Password'),
+    'address_line_1': fields.String(description='Address line 1'),
+    'address_line_2': fields.String(description='Address line 2'),
+    'city_id': fields.Integer(description='City ID'),
+    'pincode': fields.String(description='Pincode'),
 })
 
 login_model = auth_ns.model('Login', {
-    'email': fields.String(required=True, description='Email address'),
+    'username': fields.String(required=True, description='Username'),
     'password': fields.String(required=True, description='Password')
 })
 
@@ -38,22 +47,38 @@ authorizations = {
 
 @auth_ns.route('/register')
 class RegisterAPI(Resource):
-    @auth_ns.expect(user_model)
+    @auth_ns.expect(register_model)
     @auth_ns.response(201, 'User successfully registered')
     @auth_ns.response(202, 'User already exists')
     @auth_ns.response(401, 'Registration failed')
     def post(self):
         """Register a new user"""
         post_data = request.get_json()
-        user = User.query.filter_by(email=post_data.get('email')).first()
+        user = User.query.filter_by(username=post_data.get('username')).first()
         if not user:
+            # Also check email uniqueness
+            user_by_email = User.query.filter_by(email=post_data.get('email')).first()
+            if user_by_email:
+                responseObject = {
+                    'status': 'fail',
+                    'message': 'User with this email already exists. Please Log in.',
+                }
+                return responseObject, 202
             try:
                 user = User(
-                    fname=post_data.get('fname'),
-                    lname=post_data.get('lname'),
+                    name=post_data.get('name'),
                     email=post_data.get('email'),
+                    mobile=post_data.get('mobile'),
+                    branch_id=post_data.get('branch_id'),
+                    role_id=post_data.get('role_id'),
+                    country_id=post_data.get('country_id'),
+                    state_id=post_data.get('state_id'),
+                    username=post_data.get('username'),
                     password=post_data.get('password'),
-                    createdBy=None
+                    address_line_1=post_data.get('address_line_1'),
+                    address_line_2=post_data.get('address_line_2'),
+                    city_id=post_data.get('city_id'),
+                    pincode=post_data.get('pincode'),
                 )
                 db.session.add(user)
                 db.session.commit()
@@ -65,11 +90,12 @@ class RegisterAPI(Resource):
                 }
                 return responseObject, 201
             except Exception as e:
+                db.session.rollback()
                 responseObject = {
                     'status': 'fail',
-                    'message': 'Some error occurred. Please try again.'
+                    'message': 'Some error occurred: ' + str(e)
                 }
-                return responseObject, 401
+                return responseObject, 500
             finally:
                 db.session.close()
         else:
@@ -89,7 +115,7 @@ class LoginAPI(Resource):
         """Login user"""
         post_data = request.get_json()
         try:
-            user = User.query.filter_by(email=post_data.get('email')).first()
+            user = User.query.filter_by(username=post_data.get('username')).first()
             if user and bcrypt.check_password_hash(user.password, post_data.get('password')):
                 auth_token = user.encode_auth_token(user.id)
                 if auth_token:
@@ -97,16 +123,18 @@ class LoginAPI(Resource):
                         'status': 'success',
                         'message': 'Successfully logged in.',
                         'auth_token': auth_token,
-                        'username': user.email,
+                        'user_id': user.id,
+                        'username': user.username,
+                        'name': user.name,
                         'email': user.email,
-                        'first_name': "",
-                        'last_name': "",
+                        'role_id': user.role_id,
+                        'branch_id': user.branch_id,
                     }
                     return responseObject, 200
             else:
                 responseObject = {
                     'status': 'fail',
-                    'message': 'User does not exist.'
+                    'message': 'User does not exist or invalid credentials.'
                 }
                 return responseObject, 404
         except Exception as e:
@@ -115,6 +143,7 @@ class LoginAPI(Resource):
                 'message': 'Try again ' + str(e)
             }
             return responseObject, 500
+
 @auth_ns.route('/user')
 class UserAPI(Resource):
     @auth_ns.doc(security='Bearer Auth')
@@ -125,7 +154,7 @@ class UserAPI(Resource):
         auth_header = request.headers.get('Authorization')
         if auth_header:
             try:
-                auth_token = auth_header.split(" ")[0]
+                auth_token = auth_header.split(" ")[1]
             except IndexError:
                 responseObject = {
                     'status': 'fail',
@@ -141,12 +170,16 @@ class UserAPI(Resource):
                 responseObject = {
                     'status': 'success',
                     'user_id': user.id,
+                    'name': user.name,
                     'email': user.email,
-                    'admin': user.admin,
-                    'registered_on': user.createOn.isoformat() if user.createOn else None,  
-                    'username': user.email,
-                    'first_name': "",
-                    'last_name': "",
+                    'mobile': user.mobile,
+                    'username': user.username,
+                    'branch_id': user.branch_id,
+                    'role_id': user.role_id,
+                    'country_id': user.country_id,
+                    'state_id': user.state_id,
+                    'status': user.status,
+                    'registered_on': user.created_at.isoformat() if user.created_at else None,
                 }
                 return responseObject, 200
             responseObject = {
