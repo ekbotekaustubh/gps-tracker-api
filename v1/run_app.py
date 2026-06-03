@@ -3,9 +3,6 @@ import sys
 import time
 from src.server import app, db
 
-# Set environment variables
-os.environ['APP_SETTINGS'] = 'src.server.config.ProductionConfig_MySQL'
-
 def init_db(max_retries=5, retry_delay=5):
     retries = 0
     while retries < max_retries:
@@ -32,10 +29,11 @@ if __name__ == '__main__':
         sys.exit(1)
     
     # Run the application with host set to 0.0.0.0 to allow external access
+    debug = app.config.get('DEBUG', False)
     app.run(
         host='0.0.0.0',
         port=5000,
-        debug=True,
-        use_reloader=True,
+        debug=debug,
+        use_reloader=debug,
         threaded=True
-    ) 
+    )

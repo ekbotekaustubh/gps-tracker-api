@@ -1,18 +1,11 @@
-# project/server/auth/views.py
+# src/server/auth/views.py
 
-
-import traceback
-import inspect
-
-from flask import Blueprint, request, make_response, jsonify, g
-from flask.views import MethodView
-from flask_restx import Resource, fields, Namespace
+from flask import request
+from flask_restx import Resource, fields
 
 from src.server import bcrypt, db
 from src.server.models import User, BlacklistToken
 from src.server import auth_ns
-
-auth_blueprint = Blueprint('auth', __name__)
 
 # Define Swagger models
 register_model = auth_ns.model('Register', {
@@ -236,37 +229,3 @@ class LogoutAPI(Resource):
                 'message': 'Provide a valid auth token.'
             }
             return responseObject, 403
-
-# define the API resources
-registration_view = RegisterAPI.as_view('register_api')
-login_view = LoginAPI.as_view('login_api')
-user_view = UserAPI.as_view('user_api')
-logout_view = LogoutAPI.as_view('logout_api')
-
-# add Rules for API Endpoints
-auth_blueprint.add_url_rule(
-    '/auth/register',
-    view_func=registration_view,
-    methods=['POST']
-)
-auth_blueprint.add_url_rule(
-    '/auth/login',
-    view_func=login_view,
-    methods=['POST']
-)
-auth_blueprint.add_url_rule(
-    '/auth/user',
-    view_func=user_view,
-    methods=['GET']
-)
-auth_blueprint.add_url_rule(
-    '/auth/logout',
-    view_func=logout_view,
-    methods=['POST']
-)
-
-auth_blueprint.add_url_rule(
-    '/auth/refresh',
-    view_func=user_view,
-    methods=['GET']
-)

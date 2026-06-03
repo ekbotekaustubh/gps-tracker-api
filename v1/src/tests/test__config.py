@@ -1,6 +1,7 @@
-# project/tests/test_config.py
+# src/tests/test_config.py
 
 
+import os
 import unittest
 
 from flask import current_app
@@ -15,12 +16,10 @@ class TestDevelopmentConfig(TestCase):
         return app
 
     def test_app_is_development(self):
-        self.assertFalse(app.config['SECRET_KEY'] is 'my_precious')
         self.assertTrue(app.config['DEBUG'] is True)
         self.assertFalse(current_app is None)
-        self.assertTrue(
-            app.config['SQLALCHEMY_DATABASE_URI'] == 'postgresql://postgres:@localhost/flask_jwt_auth'
-        )
+        self.assertEqual(app.config['BCRYPT_LOG_ROUNDS'], 4)
+        self.assertFalse(app.config['TESTING'])
 
 
 class TestTestingConfig(TestCase):
@@ -29,11 +28,24 @@ class TestTestingConfig(TestCase):
         return app
 
     def test_app_is_testing(self):
-        self.assertFalse(app.config['SECRET_KEY'] is 'my_precious')
         self.assertTrue(app.config['DEBUG'])
-        self.assertTrue(
-            app.config['SQLALCHEMY_DATABASE_URI'] == 'postgresql://postgres:@localhost/flask_jwt_auth_test'
+        self.assertTrue(app.config['TESTING'])
+        self.assertEqual(app.config['BCRYPT_LOG_ROUNDS'], 4)
+        self.assertEqual(
+            app.config['SQLALCHEMY_DATABASE_URI'],
+            os.getenv('DATABASE_URL', 'sqlite:///:memory:')
         )
+
+
+class TestProductionConfig_MySQL(TestCase):
+    def create_app(self):
+        app.config.from_object('src.server.config.ProductionConfig_MySQL')
+        return app
+
+    def test_app_is_production_mysql(self):
+        self.assertEqual(app.config['BCRYPT_LOG_ROUNDS'], 13)
+        self.assertIn('mysql', app.config['SQLALCHEMY_DATABASE_URI'])
+        self.assertIn('gps_tracker', app.config['SQLALCHEMY_DATABASE_URI'])
 
 
 class TestProductionConfig(TestCase):
@@ -43,6 +55,7 @@ class TestProductionConfig(TestCase):
 
     def test_app_is_production(self):
         self.assertTrue(app.config['DEBUG'] is False)
+        self.assertEqual(app.config['BCRYPT_LOG_ROUNDS'], 13)
 
 
 if __name__ == '__main__':

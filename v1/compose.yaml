@@ -23,6 +23,10 @@ services:
     restart: always
     ports:
       - "5000:5000"
+    environment:
+      - SECRET_KEY=change-this-to-a-strong-random-secret
+      - APP_SETTINGS=src.server.config.ProductionConfig_MySQL
+      - DATABASE_URL=mysql+pymysql://root:toor@mysql:3306/gps_tracker
     depends_on:
       mysql:
         condition: service_healthy

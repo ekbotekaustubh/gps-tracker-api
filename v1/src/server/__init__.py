@@ -1,3 +1,5 @@
+# src/server/__init__.py
+
 import os
 
 from flask import Flask, jsonify, redirect
@@ -62,11 +64,8 @@ api = Api(
 # Create namespaces for different modules
 auth_ns = api.namespace('auth', description='Authentication operations')
 
-# Import views after creating namespaces
-from src.server.auth.views import *
+# Import and register auth views (explicit import, not wildcard)
+from src.server.auth import views as auth_views  # noqa: E402, F401
 
 # Explicitly register all namespaces
 api.add_namespace(auth_ns)
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
