@@ -1,4 +1,4 @@
-# project/server/models.py
+# src/server/models/user.py
 
 import jwt
 import datetime
@@ -14,19 +14,26 @@ class User(db.Model):
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     mobile = db.Column(db.String(20), nullable=False)
-    branch_id = db.Column(db.Integer, nullable=False)
-    role_id = db.Column(db.Integer, nullable=False)
+    branch_id = db.Column(db.Integer, db.ForeignKey('branches.id'), nullable=False)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
     address_line_1 = db.Column(db.String(255), nullable=True)
     address_line_2 = db.Column(db.String(255), nullable=True)
-    city_id = db.Column(db.Integer, nullable=True)
+    city_id = db.Column(db.Integer, db.ForeignKey('cities.id'), nullable=True)
     pincode = db.Column(db.String(20), nullable=True)
-    country_id = db.Column(db.Integer, nullable=False)
-    state_id = db.Column(db.Integer, nullable=False)
+    country_id = db.Column(db.Integer, db.ForeignKey('countries.id'), nullable=False)
+    state_id = db.Column(db.Integer, db.ForeignKey('states.id'), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     status = db.Column(db.SmallInteger, nullable=False, default=1)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+
+    # Relationships
+    branch = db.relationship('Branch', backref=db.backref('users', lazy=True))
+    role = db.relationship('Role', backref=db.backref('users', lazy=True))
+    country = db.relationship('Country', backref=db.backref('users', lazy=True))
+    state = db.relationship('State', backref=db.backref('users', lazy=True))
+    city = db.relationship('City', backref=db.backref('users', lazy=True))
 
     def __init__(self, name, email, mobile, branch_id, role_id, country_id, state_id,
                  username, password, address_line_1=None, address_line_2=None,
@@ -76,6 +83,7 @@ class User(db.Model):
         :param auth_token:
         :return: integer|string
         """
+        from src.server.models.blacklist_token import BlacklistToken
         try:
             payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'), algorithms=['HS256'])
             is_blacklisted_token = BlacklistToken.check_blacklist(auth_token)
@@ -91,29 +99,5 @@ class User(db.Model):
         except jwt.InvalidTokenError as e:
             return 'Invalid token ({}). Please log in again.'.format(e)
 
-
-class BlacklistToken(db.Model):
-    """
-    Token Model for storing JWT tokens
-    """
-    __tablename__ = 'blacklist_tokens'
-
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    token = db.Column(db.String(500), nullable=False)
-    blacklisted_on = db.Column(db.DateTime, nullable=False)
-
-    def __init__(self, token):
-        self.token = token
-        self.blacklisted_on = datetime.datetime.utcnow()
-
     def __repr__(self):
-        return '<id: token: {}'.format(self.token)
-
-    @staticmethod
-    def check_blacklist(auth_token):
-        # check whether auth token has been blacklisted
-        res = BlacklistToken.query.filter_by(token=str(auth_token)).first()
-        if res:
-            return True
-        else:
-            return False
+        return f'<User {self.username}>'

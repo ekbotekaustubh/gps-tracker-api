@@ -20,7 +20,8 @@ COV = coverage.coverage(
 )
 COV.start()
 
-from src.server import app, db, models
+from src.server import app, db
+from src.server import models  # noqa: F401 — ensures all models are registered with SQLAlchemy
 
 cli = FlaskGroup(app)
 
