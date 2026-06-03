@@ -171,7 +171,7 @@ class UserAPI(Resource):
                     'role_id': user.role_id,
                     'country_id': user.country_id,
                     'state_id': user.state_id,
-                    'status': user.status,
+                    'user_status': user.status,
                     'registered_on': user.created_at.isoformat() if user.created_at else None,
                 }
                 return responseObject, 200

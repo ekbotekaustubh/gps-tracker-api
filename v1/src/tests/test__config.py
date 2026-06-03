@@ -33,7 +33,7 @@ class TestTestingConfig(TestCase):
         self.assertEqual(app.config['BCRYPT_LOG_ROUNDS'], 4)
         self.assertEqual(
             app.config['SQLALCHEMY_DATABASE_URI'],
-            os.getenv('DATABASE_URL', 'sqlite:///:memory:')
+            'sqlite:///:memory:'
         )
 
 

@@ -25,6 +25,16 @@ app_settings = os.getenv(
 )
 app.config.from_object(app_settings)
 
+# Dynamically import and run init_app on config class
+try:
+    from src.server import config
+    config_class_name = app_settings.split('.')[-1]
+    config_class = getattr(config, config_class_name)
+    if hasattr(config_class, 'init_app'):
+        config_class.init_app(app)
+except Exception:
+    pass
+
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 

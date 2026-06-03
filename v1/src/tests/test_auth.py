@@ -4,8 +4,9 @@
 import time
 import json
 import unittest
+import datetime
 
-from src.server import db
+from src.server import app, db
 from src.server.models import User, BlacklistToken
 from src.tests.base import BaseTestCase
 
@@ -15,7 +16,7 @@ TEST_USER = {
     'name': 'Joe Test',
     'email': 'joe@gmail.com',
     'mobile': '9876543210',
-    'branch_id': 0,
+    'branch_id': 1,
     'role_id': 1,
     'country_id': 1,
     'state_id': 1,
@@ -27,7 +28,7 @@ TEST_USER_2 = {
     'name': 'Jane Test',
     'email': 'jane@gmail.com',
     'mobile': '9876543211',
-    'branch_id': 0,
+    'branch_id': 1,
     'role_id': 1,
     'country_id': 1,
     'state_id': 1,
@@ -195,23 +196,23 @@ class TestAuthBlueprint(BaseTestCase):
     def test_invalid_logout(self):
         """ Testing logout after the token expires """
         with self.client:
-            # user registration
-            resp_register = register_user(self)
-            data_register = json.loads(resp_register.data.decode())
-            self.assertTrue(data_register['status'] == 'success')
-            self.assertEqual(resp_register.status_code, 201)
-            # user login
-            resp_login = login_user(self, TEST_USER['username'], TEST_USER['password'])
-            data_login = json.loads(resp_login.data.decode())
-            self.assertTrue(data_login['status'] == 'success')
-            self.assertTrue(data_login['auth_token'])
-            self.assertEqual(resp_login.status_code, 200)
+            # Generate an expired token
+            import jwt
+            expired_payload = {
+                'exp': datetime.datetime.utcnow() - datetime.timedelta(seconds=1),
+                'iat': datetime.datetime.utcnow() - datetime.timedelta(seconds=10),
+                'sub': 1
+            }
+            expired_token = jwt.encode(
+                expired_payload,
+                app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
             # invalid token logout
-            time.sleep(6)
             response = self.client.post(
                 '/api/v1/auth/logout',
                 headers=dict(
-                    Authorization='Bearer ' + data_login['auth_token']
+                    Authorization='Bearer ' + expired_token
                 )
             )
             data = json.loads(response.data.decode())

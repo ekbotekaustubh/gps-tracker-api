@@ -5,7 +5,7 @@ import unittest
 import coverage
 from flask.cli import FlaskGroup
 from src.server import app, db
-from src.server import models  # noqa: F401 — ensures all models are registered with SQLAlchemy
+from src.server import models  # noqa: F401 - ensures all models are registered with SQLAlchemy
 
 
 COV = coverage.coverage(

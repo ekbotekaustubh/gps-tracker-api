@@ -16,7 +16,7 @@ class TestUserModel(BaseTestCase):
             name='Test User',
             email='test@test.com',
             mobile='9876543210',
-            branch_id=0,
+            branch_id=1,
             role_id=1,
             country_id=1,
             state_id=1,
