@@ -3,7 +3,7 @@ CREATE DATABASE IF NOT EXISTS `gps_tracker` DEFAULT CHARACTER SET utf8mb4 COLLAT
 USE `gps_tracker`;
 
 -- 1. Countries Table
-CREATE TABLE `countries` (
+CREATE TABLE IF NOT EXISTS `countries` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `country_code` VARCHAR(10) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE `countries` (
 ) ENGINE=InnoDB;
 
 -- 2. States Table
-CREATE TABLE `states` (
+CREATE TABLE IF NOT EXISTS `states` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `state_code` VARCHAR(10) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `states` (
 ) ENGINE=InnoDB;
 
 -- 3. Cities Table
-CREATE TABLE `cities` (
+CREATE TABLE IF NOT EXISTS `cities` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `state_id` INT NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `cities` (
 ) ENGINE=InnoDB;
 
 -- 4. Organizations Table
-CREATE TABLE `organizations` (
+CREATE TABLE IF NOT EXISTS `organizations` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(150) NOT NULL,
     `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '0: Inactive, 1: Active',
@@ -44,7 +44,7 @@ CREATE TABLE `organizations` (
 ) ENGINE=InnoDB;
 
 -- 4. Branches Table
-CREATE TABLE `branches` (
+CREATE TABLE IF NOT EXISTS `branches` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `org_id` INT NOT NULL,
     `name` VARCHAR(150) NOT NULL,
@@ -68,7 +68,7 @@ CREATE TABLE `branches` (
 ) ENGINE=InnoDB;
 
 -- 5. Roles Table
-CREATE TABLE `roles` (
+CREATE TABLE IF NOT EXISTS `roles` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(50) NOT NULL UNIQUE,
     `status` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '0: Inactive, 1: Active',
@@ -77,7 +77,7 @@ CREATE TABLE `roles` (
 ) ENGINE=InnoDB;
 
 -- 6. Users Table
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(150) NOT NULL UNIQUE,
@@ -86,7 +86,6 @@ CREATE TABLE `users` (
     `role_id` INT NOT NULL,
     `address_line_1` VARCHAR(255) DEFAULT NULL,
     `address_line_2` VARCHAR(255) DEFAULT NULL,
-    `city` VARCHAR(100) DEFAULT NULL,
     `pincode` VARCHAR(20) DEFAULT NULL,
     `country_id` INT NOT NULL,
     `state_id` INT NOT NULL,
@@ -104,7 +103,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB;
 
 -- 7. Permissions Table
-CREATE TABLE `permissions` (
+CREATE TABLE IF NOT EXISTS `permissions` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `permission_key` VARCHAR(100) NOT NULL UNIQUE,
@@ -115,7 +114,7 @@ CREATE TABLE `permissions` (
 ) ENGINE=InnoDB;
 
 -- 8. Role Permissions Table (Composite Primary Key Setup)
-CREATE TABLE `role_permissions` (
+CREATE TABLE IF NOT EXISTS `role_permissions` (
     `role_id` INT NOT NULL,
     `permission_id` INT NOT NULL,
     PRIMARY KEY (`role_id`, `permission_id`),
@@ -124,7 +123,7 @@ CREATE TABLE `role_permissions` (
 ) ENGINE=InnoDB;
 
 -- 9. Cards Table (GPS Tracking Devices)
-CREATE TABLE `cards` (
+CREATE TABLE IF NOT EXISTS `cards` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `imei_number` VARCHAR(50) NOT NULL UNIQUE,
@@ -137,7 +136,7 @@ CREATE TABLE `cards` (
 ) ENGINE=InnoDB;
 
 -- 10. Card Members Table
-CREATE TABLE `card_members` (
+CREATE TABLE IF NOT EXISTS `card_members` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(100) NOT NULL,
     `email` VARCHAR(150) DEFAULT NULL,
@@ -165,7 +164,7 @@ CREATE TABLE `card_members` (
 ) ENGINE=InnoDB;
 
 -- 11. Locations Table
-CREATE TABLE `locations` (
+CREATE TABLE IF NOT EXISTS `locations` (
     `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
     `card_id` INT NOT NULL,
     `lat` DECIMAL(10, 8) NOT NULL COMMENT 'Latitude coordinate',
@@ -342,5 +341,5 @@ INSERT INTO `cities` (`name`, `state_id`, `country_id`) VALUES
 -- Puducherry (36)
 ('Puducherry', 36, 1);
 
-INSERT INTO `users` (`id`, `name`, `email`, `mobile`, `branch_id`, `role_id`, `address_line_1`, `address_line_2`, `city`, `pincode`, `country_id`, `state_id`, `city_id`, `username`, `password`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin@email.com', '4565768798', 0, 1, 'string', 'string', NULL, '412308', 1, 14, 36, 'admin', '$2b$13$336oUAFra1cg8hzxsSf.6eY9lr6uBGRvCwIXe5wFA/OX2Jhub2n4y', 1, '2026-05-29 18:01:20', '2026-05-29 18:01:20');
+INSERT INTO `users` (`id`, `name`, `email`, `mobile`, `branch_id`, `role_id`, `address_line_1`, `address_line_2`, `pincode`, `country_id`, `state_id`, `city_id`, `username`, `password`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'admin', 'admin@email.com', '4565768798', 0, 1, 'string', 'string', '412308', 1, 14, 36, 'admin', '$2b$13$336oUAFra1cg8hzxsSf.6eY9lr6uBGRvCwIXe5wFA/OX2Jhub2n4y', 1, '2026-05-29 18:01:20', '2026-05-29 18:01:20');
