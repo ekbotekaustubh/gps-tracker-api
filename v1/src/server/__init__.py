@@ -73,9 +73,12 @@ api = Api(
 
 # Create namespaces for different modules
 auth_ns = api.namespace('auth', description='Authentication operations')
+countries_ns = api.namespace('countries', description='Countries operations')
 
 # Import and register auth views (explicit import, not wildcard)
 from src.server.auth import views as auth_views  # noqa: E402, F401
+from src.server.countries import views as countries_views  # noqa: E402, F401
 
 # Explicitly register all namespaces
 api.add_namespace(auth_ns)
+api.add_namespace(countries_ns)
