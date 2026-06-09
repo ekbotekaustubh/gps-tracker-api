@@ -29,8 +29,8 @@ class CountriesAPI(Resource):
                     'id': country.id,
                     'name': country.name,
                     'country_code': country.country_code,
-                    'created_at': country.created_at,
-                    'updated_at': country.updated_at,
+                    'created_at': country.created_at.isoformat() if country.created_at else None,
+                    'updated_at': country.updated_at.isoformat() if country.updated_at else None,
                 }
                 for country in countries
             ]
@@ -68,8 +68,8 @@ class CountryDetailAPI(Resource):
                     'id': country.id,
                     'name': country.name,
                     'country_code': country.country_code,
-                    'created_at': country.created_at,
-                    'updated_at': country.updated_at,
+                    'created_at': country.created_at.isoformat() if country.created_at else None,
+                    'updated_at': country.updated_at.isoformat() if country.updated_at else None,
                 }
             }, 200
         except Exception as e:

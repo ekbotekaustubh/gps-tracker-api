@@ -70,6 +70,21 @@ class TestCountriesAPI(BaseTestCase):
 
     def test_get_empty_countries_list(self):
         """Test retrieving countries when no countries exist"""
+        # Clear database tables to ensure no countries exist
+        from src.server.models.branch import Branch
+        from src.server.models.user import User
+        from src.server.models.card_member import CardMember
+        from src.server.models.city import City
+        from src.server.models.state import State
+        
+        db.session.query(User).delete()
+        db.session.query(Branch).delete()
+        db.session.query(CardMember).delete()
+        db.session.query(City).delete()
+        db.session.query(State).delete()
+        db.session.query(Country).delete()
+        db.session.commit()
+
         # Make request with empty database
         response = self.client.get('/api/v1/countries')
         
