@@ -3,31 +3,33 @@ from flask_restx import Resource, fields
 
 from src.server import bcrypt, db
 from src.server.models import User, BlacklistToken
-from src.server import auth_ns
+from src.server import user_ns
 
-register_model = auth_ns.model('Register', {
-    'name': fields.String(required=True, description='Full name'),
-    'email': fields.String(required=True, description='Email address'),
-    'mobile': fields.String(required=True, description='Mobile number'),
-    'branch_id': fields.Integer(required=True, description='Branch ID'),
-    'role_id': fields.Integer(required=True, description='Role ID'),
-    'country_id': fields.Integer(required=True, description='Country ID'),
-    'state_id': fields.Integer(required=True, description='State ID'),
-    'username': fields.String(required=True, description='Username'),
-    'password': fields.String(required=True, description='Password'),
+
+user_model = user_ns.model('User', {
+    'id': fields.Integer(description='User ID'),
+    'name': fields.String(description='Full name'),
+    'email': fields.String(description='Email address'),
+    'mobile': fields.String(description='Mobile number'),
+    'username': fields.String(description='Username'),
+    'branch_id': fields.Integer(description='Branch ID'),
+    'role_id': fields.Integer(description='Role ID'),
+    'country_id': fields.Integer(description='Country ID'),
+    'state_id': fields.Integer(description='State ID'),
     'address_line_1': fields.String(description='Address line 1'),
     'address_line_2': fields.String(description='Address line 2'),
     'city_id': fields.Integer(description='City ID'),
     'pincode': fields.String(description='Pincode'),
+    'status': fields.Boolean(description='User status')
 })
 
 
-@auth_ns.route('/users/<int:user_id>')
+@user_ns.route('/users/<int:user_id>')
 class UsersAPI(Resource):
-    @auth_ns.doc(security='Bearer Auth')
-    @auth_ns.response(200, 'Success')
-    @auth_ns.response(401, 'Invalid token')
-    @auth_ns.response(404, 'User not found')
+    @user_ns.doc(security='Bearer Auth')
+    @user_ns.response(200, 'Success', user_model)
+    @user_ns.response(401, 'Invalid token')
+    @user_ns.response(404, 'User not found')
     def get(self, user_id):
         """Get user by user ID"""
         auth_header = request.headers.get('Authorization')
