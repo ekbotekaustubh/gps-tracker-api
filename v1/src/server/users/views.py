@@ -5,6 +5,22 @@ from src.server import bcrypt, db
 from src.server.models import User, BlacklistToken
 from src.server import auth_ns
 
+register_model = auth_ns.model('Register', {
+    'name': fields.String(required=True, description='Full name'),
+    'email': fields.String(required=True, description='Email address'),
+    'mobile': fields.String(required=True, description='Mobile number'),
+    'branch_id': fields.Integer(required=True, description='Branch ID'),
+    'role_id': fields.Integer(required=True, description='Role ID'),
+    'country_id': fields.Integer(required=True, description='Country ID'),
+    'state_id': fields.Integer(required=True, description='State ID'),
+    'username': fields.String(required=True, description='Username'),
+    'password': fields.String(required=True, description='Password'),
+    'address_line_1': fields.String(description='Address line 1'),
+    'address_line_2': fields.String(description='Address line 2'),
+    'city_id': fields.Integer(description='City ID'),
+    'pincode': fields.String(description='Pincode'),
+})
+
 
 @auth_ns.route('/users/<int:user_id>')
 class UsersAPI(Resource):
