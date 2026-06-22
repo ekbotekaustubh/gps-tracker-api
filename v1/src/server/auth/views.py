@@ -137,6 +137,9 @@ class LoginAPI(Resource):
             }
             return responseObject, 500
 
+from src.server.auth.utility import extract_auth_token
+
+
 @auth_ns.route('/user')
 class UserAPI(Resource):
     @auth_ns.doc(security='Bearer Auth')
@@ -144,48 +147,34 @@ class UserAPI(Resource):
     @auth_ns.response(401, 'Invalid token')
     def get(self):
         """Get user information"""
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            try:
-                auth_token = auth_header.split(" ")[1]
-            except IndexError:
-                responseObject = {
-                    'status': 'fail',
-                    'message': 'Bearer token malformed.'
-                }
-                return responseObject, 401
-        else:
-            auth_token = ''
-        if auth_token:
-            resp = User.decode_auth_token(auth_token)
-            if not isinstance(resp, str):
-                user = User.query.filter_by(id=resp).first()
-                responseObject = {
-                    'status': 'success',
-                    'user_id': user.id,
-                    'name': user.name,
-                    'email': user.email,
-                    'mobile': user.mobile,
-                    'username': user.username,
-                    'branch_id': user.branch_id,
-                    'role_id': user.role_id,
-                    'country_id': user.country_id,
-                    'state_id': user.state_id,
-                    'user_status': user.status,
-                    'registered_on': user.created_at.isoformat() if user.created_at else None,
-                }
-                return responseObject, 200
+        auth_token, responseObject, status_code = extract_auth_token()
+        if responseObject:
+            return responseObject, status_code
+
+        resp = User.decode_auth_token(auth_token)
+        if not isinstance(resp, str):
+            user = User.query.filter_by(id=resp).first()
             responseObject = {
-                'status': 'fail',
-                'message': resp
+                'status': 'success',
+                'user_id': user.id,
+                'name': user.name,
+                'email': user.email,
+                'mobile': user.mobile,
+                'username': user.username,
+                'branch_id': user.branch_id,
+                'role_id': user.role_id,
+                'country_id': user.country_id,
+                'state_id': user.state_id,
+                'user_status': user.status,
+                'registered_on': user.created_at.isoformat() if user.created_at else None,
             }
-            return responseObject, 401
-        else:
-            responseObject = {
-                'status': 'fail',
-                'message': 'Provide a valid auth token.'
-            }
-            return responseObject, 401
+            return responseObject, 200
+
+        responseObject = {
+            'status': 'fail',
+            'message': resp
+        }
+        return responseObject, 401
         
 @auth_ns.route('/logout')
 class LogoutAPI(Resource):
@@ -194,38 +183,30 @@ class LogoutAPI(Resource):
     @auth_ns.response(403, 'No token provided')
     def post(self):
         """Logout user"""
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
-            auth_token = auth_header.split(" ")[1]
-        else:
-            auth_token = ''
-        if auth_token:
-            resp = User.decode_auth_token(auth_token)
-            if not isinstance(resp, str):
-                blacklist_token = BlacklistToken(token=auth_token)
-                try:
-                    db.session.add(blacklist_token)
-                    db.session.commit()
-                    responseObject = {
-                        'status': 'success',
-                        'message': 'Successfully logged out.'
-                    }
-                    return responseObject, 200
-                except Exception as e:
-                    responseObject = {
-                        'status': 'fail',
-                        'message': e
-                    }
-                    return responseObject, 200
-            else:
+        auth_token, responseObject, status_code = extract_auth_token()
+        if responseObject:
+            return responseObject, status_code
+
+        resp = User.decode_auth_token(auth_token)
+        if not isinstance(resp, str):
+            blacklist_token = BlacklistToken(token=auth_token)
+            try:
+                db.session.add(blacklist_token)
+                db.session.commit()
+                responseObject = {
+                    'status': 'success',
+                    'message': 'Successfully logged out.'
+                }
+                return responseObject, 200
+            except Exception as e:
                 responseObject = {
                     'status': 'fail',
-                    'message': resp
+                    'message': str(e)
                 }
-                return responseObject, 401
+                return responseObject, 500
         else:
             responseObject = {
                 'status': 'fail',
-                'message': 'Provide a valid auth token.'
+                'message': resp
             }
-            return responseObject, 403
+            return responseObject, 401

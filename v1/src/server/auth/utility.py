@@ -3,26 +3,31 @@ from flask import request, make_response, jsonify, g
 from src.server.models import User
 
 
+def extract_auth_token(auth_header=None):
+    if auth_header is None:
+        auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return None, {
+            'status': 'fail',
+            'message': 'Provide a valid auth token.'
+        }, 401
+
+    parts = auth_header.split()
+    if len(parts) != 2 or parts[0].lower() != 'bearer':
+        return None, {
+            'status': 'fail',
+            'message': 'Bearer token malformed.'
+        }, 401
+
+    return parts[1], None, None
+
+
 def check_login(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Get the auth token
-        auth_header = request.headers.get('Authorization')
-        if not auth_header:
-            responseObject = {
-                'status': 'fail',
-                'message': 'Provide a valid auth token.'
-            }
-            return make_response(jsonify(responseObject)), 401
-
-        try:
-            auth_token = auth_header.split(" ")[1]
-        except IndexError:
-            responseObject = {
-                'status': 'fail',
-                'message': 'Bearer token malformed.'
-            }
-            return make_response(jsonify(responseObject)), 401
+        auth_token, responseObject, status_code = extract_auth_token()
+        if responseObject:
+            return make_response(jsonify(responseObject)), status_code
 
         resp = User.decode_auth_token(auth_token)
         if not isinstance(resp, str) and resp is not None:

@@ -4,6 +4,7 @@ from flask_restx import Resource, fields
 from src.server import bcrypt, db
 from src.server.models import User, BlacklistToken
 from src.server import user_ns
+from src.server.auth.utility import extract_auth_token
 
 
 user_model = user_ns.model('User', {
@@ -32,63 +33,48 @@ class UsersAPI(Resource):
     @user_ns.response(404, 'User not found')
     def get(self, user_id):
         """Get user by user ID"""
-        auth_header = request.headers.get('Authorization')
-        if auth_header:
+        auth_token, responseObject, status_code = extract_auth_token()
+        if responseObject:
+            return responseObject, status_code
+
+        resp = User.decode_auth_token(auth_token)
+        if not isinstance(resp, str):
             try:
-                auth_token = auth_header.split(" ")[1]
-            except IndexError:
-                responseObject = {
-                    'status': 'fail',
-                    'message': 'Bearer token malformed.'
-                }
-                return responseObject, 401
-        else:
-            auth_token = ''
-        if auth_token:
-            resp = User.decode_auth_token(auth_token)
-            if not isinstance(resp, str):
-                try:
-                    user = User.query.filter_by(id=user_id).first()
-                    if user:
-                        responseObject = {
-                            'status': 'success',
-                            'user_id': user.id,
-                            'name': user.name,
-                            'email': user.email,
-                            'mobile': user.mobile,
-                            'username': user.username,
-                            'branch_id': user.branch_id,
-                            'role_id': user.role_id,
-                            'country_id': user.country_id,
-                            'state_id': user.state_id,
-                            'address_line_1': user.address_line_1,
-                            'address_line_2': user.address_line_2,
-                            'city_id': user.city_id,
-                            'pincode': user.pincode,
-                            'status': user.status,
-                            #'registered_on': user.created_at.isoformat() if user.created_at else None,
-                        }
-                        return responseObject, 200
-                    else:
-                        responseObject = {
-                            'status': 'fail',
-                            'message': 'User not found.'
-                        }
-                        return responseObject, 404
-                except Exception as e:
+                user = User.query.filter_by(id=user_id).first()
+                if user:
+                    responseObject = {
+                        'status': 'success',
+                        'user_id': user.id,
+                        'name': user.name,
+                        'email': user.email,
+                        'mobile': user.mobile,
+                        'username': user.username,
+                        'branch_id': user.branch_id,
+                        'role_id': user.role_id,
+                        'country_id': user.country_id,
+                        'state_id': user.state_id,
+                        'address_line_1': user.address_line_1,
+                        'address_line_2': user.address_line_2,
+                        'city_id': user.city_id,
+                        'pincode': user.pincode,
+                        'status': user.status,
+                        #'registered_on': user.created_at.isoformat() if user.created_at else None,
+                    }
+                    return responseObject, 200
+                else:
                     responseObject = {
                         'status': 'fail',
-                        'message': 'Error retrieving user: ' + str(e)
+                        'message': 'User not found.'
                     }
-                    return responseObject, 500
-            responseObject = {
-                'status': 'fail',
-                'message': resp
-            }
-            return responseObject, 401
-        else:
-            responseObject = {
-                'status': 'fail',
-                'message': 'Provide a valid auth token.'
-            }
-            return responseObject, 401
+                    return responseObject, 404
+            except Exception as e:
+                responseObject = {
+                    'status': 'fail',
+                    'message': 'Error retrieving user: ' + str(e)
+                }
+                return responseObject, 500
+        responseObject = {
+            'status': 'fail',
+            'message': resp
+        }
+        return responseObject, 401
