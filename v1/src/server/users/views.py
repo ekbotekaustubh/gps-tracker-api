@@ -1,13 +1,14 @@
 from flask import request
-from flask_restx import Resource, fields
+from flask_restx import Resource, fields, Namespace
 
-from src.server import bcrypt, db
-from src.server.models import User, BlacklistToken
-from src.server import user_ns
+from src.server import db
+from src.server.models import User
 from src.server.auth.utility import extract_auth_token
 
+# Create namespace
+users_ns = Namespace('users', description='User operations')
 
-user_model = user_ns.model('User', {
+user_model = users_ns.model('User', {
     'id': fields.Integer(description='User ID'),
     'name': fields.String(description='Full name'),
     'email': fields.String(description='Email address'),
@@ -25,12 +26,12 @@ user_model = user_ns.model('User', {
 })
 
 
-@user_ns.route('/users/<int:user_id>')
-class UsersAPI(Resource):
-    @user_ns.doc(security='Bearer Auth')
-    @user_ns.response(200, 'Success', user_model)
-    @user_ns.response(401, 'Invalid token')
-    @user_ns.response(404, 'User not found')
+@users_ns.route('/<int:user_id>')
+class UserAPI(Resource):
+    @users_ns.doc(security='Bearer Auth')
+    @users_ns.response(200, 'Success', user_model)
+    @users_ns.response(401, 'Invalid token')
+    @users_ns.response(404, 'User not found')
     def get(self, user_id):
         """Get user by user ID"""
         auth_token, responseObject, status_code = extract_auth_token()
@@ -58,7 +59,6 @@ class UsersAPI(Resource):
                         'city_id': user.city_id,
                         'pincode': user.pincode,
                         'status': user.status,
-                        #'registered_on': user.created_at.isoformat() if user.created_at else None,
                     }
                     return responseObject, 200
                 else:
