@@ -35,9 +35,16 @@ class BaseTestCase(TestCase):
         db.session.add(role)
         db.session.flush()
 
-        org = Organization(name='Test Org', status=1)
-        db.session.add(org)
-        db.session.flush()
+        org = Organization(
+        name='Test Org',
+        address_line_1='Test Address',
+        address_line_2='',
+        city='Mumbai',
+        pincode='400001',
+        coun32try_id=country.id,
+        state_id=state.id,
+        status=True
+        )
 
         branch = Branch(
             org_id=org.id,
