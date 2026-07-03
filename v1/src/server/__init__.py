@@ -76,6 +76,7 @@ auth_ns = api.namespace('auth', description='Authentication operations')
 countries_ns = api.namespace('countries', description='Countries operations')
 states_ns = api.namespace('states', description='States operations')
 cities_ns = api.namespace('cities', description='Cities operations')
+organizations_ns = api.namespace('organizations', description='organizations operations')
 
 
 # Import and register auth views (explicit import, not wildcard)
@@ -84,6 +85,7 @@ from src.server.countries import views as countries_views  # noqa: E402, F401
 from src.server.states import views as states_views  # noqa: E402, F401
 from src.server.cities import views as cities_views  # noqa: E402, F401
 from src.server.users import views as users_views  # noqa: E402, F401
+from src.server.organizations import views as organizations_views  # noqa: E402, F401
 
 # Explicitly register all namespaces
 api.add_namespace(auth_ns)
@@ -91,3 +93,4 @@ api.add_namespace(countries_ns)
 api.add_namespace(states_ns)
 api.add_namespace(cities_ns)
 api.add_namespace(users_views.users_ns)
+api.add_namespace(organizations_ns)
