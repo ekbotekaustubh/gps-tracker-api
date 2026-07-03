@@ -56,7 +56,7 @@ class AddBranchAPI(Resource):
         try:
             data = request.get_json()
             
-            # Validate required fields
+            
             required_data = ['org_id', 'name', 'address_line_1', 'city', 'pincode', 'country_id', 'state_id', 'mobile']
             for field in required_data:
                 if field not in data or not data[field]:
@@ -66,7 +66,7 @@ class AddBranchAPI(Resource):
                     }
                     return responseObject, 400
             
-            # Create new branch
+            
             branch = Branch(
                 org_id=data['org_id'],
                 name=data['name'],
