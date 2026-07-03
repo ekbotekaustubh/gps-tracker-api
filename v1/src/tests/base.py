@@ -41,10 +41,13 @@ class BaseTestCase(TestCase):
         address_line_2='',
         city='Mumbai',
         pincode='400001',
-        coun32try_id=country.id,
+        country_id=country.id,
         state_id=state.id,
         status=True
-        )
+    )
+
+        db.session.add(org)
+        db.session.flush()
 
         branch = Branch(
             org_id=org.id,

@@ -23,7 +23,7 @@ __all__ = [
     'Country',
     'State',
     'City',
-    'Organisation',
+    'organization',
     'Branch',
     'Role',
     'Permission',

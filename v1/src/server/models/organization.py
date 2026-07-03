@@ -6,7 +6,7 @@ from src.server import db
 
 
 class Organization(db.Model):
-    """Organisation Model"""
+    """organization Model"""
 
     __tablename__ = 'organizations'
 
