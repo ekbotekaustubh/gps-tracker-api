@@ -7,7 +7,7 @@ from src.server.models import Organization
 
 
 # Swagger Model
-organization_model = organizations_ns.model('Organzation', {
+organization_model = organizations_ns.model('Organization', {
     'id': fields.Integer(description='Organization ID'),
     'name': fields.String(required=True, description='Organization Name'),
     'address_line_1': fields.String(required=True, description='Address Line 1'),
@@ -22,8 +22,8 @@ organization_model = organizations_ns.model('Organzation', {
 })
 
 
-@organizations_ns.route('')
-class organizationsAPI(Resource):
+@organizations_ns.route('', '/<int:organization_id>')
+class OrganizationsAPI(Resource):
 
     @organizations_ns.expect(organization_model)
     @organizations_ns.response(201, 'Organization created successfully')
@@ -82,18 +82,49 @@ class organizationsAPI(Resource):
         finally:
             db.session.close()
 
-##########################################################################
     @organizations_ns.response(200, 'Success', [organization_model])
     @organizations_ns.response(404, 'Organization not found')
     @organizations_ns.response(500, 'Internal server error')
-    def get(self):
-        """Get organization list or organization by name"""
+    def get(self, organization_id=None):
+        """Get organization list, organization by name, or organization by ID"""
 
-        organization_name = request.args.get('name')
-
+        # If organization_id provided, return by ID
         try:
+            if organization_id is not None:
+
+                organization = Organization.query.filter_by(
+                    id=organization_id
+                ).first()
+
+                if not organization:
+                    responseObject = {
+                        'status': 'fail',
+                        'message': 'Organization not found.'
+                    }
+                    return responseObject, 404
+
+                responseObject = {
+                    'status': 'success',
+                    'message': 'organization retrieved successfully.',
+                    'data': {
+                        'id': organization.id,
+                        'name': organization.name,
+                        'address_line_1': organization.address_line_1,
+                        'address_line_2': organization.address_line_2,
+                        'city': organization.city,
+                        'pincode': organization.pincode,
+                        'country_id': organization.country_id,
+                        'state_id': organization.state_id,
+                        'status': organization.status,
+                        'created_at': organization.created_at.isoformat() if organization.created_at else None,
+                        'updated_at': organization.updated_at.isoformat() if organization.updated_at else None,
+                    }
+                }
+
+                return responseObject, 200
 
             # GET /api/v1/organizations?name=ABC
+            organization_name = request.args.get('name')
             if organization_name:
 
                 organization = Organization.query.filter_by(
@@ -163,62 +194,6 @@ class organizationsAPI(Resource):
             }
 
             return responseObject, 500
-
- ###########################################################
-@organizations_ns.route('/<int:organization_id>')
-class organizationAPI(Resource):
-
-    @organizations_ns.response(200, 'Success', organization_model)
-    @organizations_ns.response(404, 'organization not found')
-    @organizations_ns.response(500, 'Internal server error')
-    def get(self, organization_id):
-        """Get organization details by ID"""
-
-        try:
-
-            organization = Organization.query.filter_by(
-                id=organization_id
-            ).first()
-
-            if not organization:
-
-                responseObject = {
-                    'status': 'fail',
-                    'message': 'organization not found.'
-                }
-
-                return responseObject, 404
-
-            responseObject = {
-                'status': 'success',
-                'message': 'organization retrieved successfully.',
-                'data': {
-                    'id': organization.id,
-                    'name': organization.name,
-                    'address_line_1': organization.address_line_1,
-                    'address_line_2': organization.address_line_2,
-                    'city': organization.city,
-                    'pincode': organization.pincode,
-                    'country_id': organization.country_id,
-                    'state_id': organization.state_id,
-                    'status': organization.status,
-                    'created_at': organization.created_at.isoformat() if organization.created_at else None,
-                    'updated_at': organization.updated_at.isoformat() if organization.updated_at else None
-                }
-            }
-
-            return responseObject, 200
-
-        except Exception as e:
-
-            responseObject = {
-                'status': 'fail',
-                'message': 'Error retrieving organization: ' + str(e)
-            }
-
-            return responseObject, 500
-#################################################################
-
     @organizations_ns.expect(organization_model)
     @organizations_ns.response(200, 'organization updated successfully')
     @organizations_ns.response(404, 'organization not found')
