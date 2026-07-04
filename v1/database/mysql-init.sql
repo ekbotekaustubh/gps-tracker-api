@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `cities` (
     INDEX `idx_cities_country_id` (`country_id`)
 ) ENGINE=InnoDB;
 
--- 4. Organizations Table
+-- 4. organizations Table
 CREATE TABLE IF NOT EXISTS `organizations` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `name` VARCHAR(150) NOT NULL,

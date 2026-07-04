@@ -16,13 +16,14 @@ from src.server.models.card import Card
 from src.server.models.card_member import CardMember
 from src.server.models.location import Location
 
+
 __all__ = [
     'User',
     'BlacklistToken',
     'Country',
     'State',
     'City',
-    'Organization',
+    'organization',
     'Branch',
     'Role',
     'Permission',
