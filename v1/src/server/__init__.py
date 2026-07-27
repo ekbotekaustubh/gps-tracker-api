@@ -86,6 +86,7 @@ from src.server.states import views as states_views  # noqa: E402, F401
 from src.server.cities import views as cities_views  # noqa: E402, F401
 from src.server.users import views as users_views  # noqa: E402, F401
 from src.server.organizations import views as organizations_views  # noqa: E402, F401
+from src.server.roles import views as roles_views  # noqa: E402, F401
 
 # Explicitly register all namespaces
 api.add_namespace(auth_ns)
@@ -94,3 +95,4 @@ api.add_namespace(states_ns)
 api.add_namespace(cities_ns)
 api.add_namespace(users_views.users_ns)
 api.add_namespace(organizations_ns)
+api.add_namespace(roles_views.roles_ns)
