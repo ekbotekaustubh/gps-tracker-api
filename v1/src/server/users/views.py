@@ -1,5 +1,5 @@
 from flask import request
-from flask_restx import Resource, fields, Namespace
+from flask_restx import Resource, fields, Namespace, reqparse
 
 from src.server import db
 from src.server.models import User
@@ -40,6 +40,9 @@ user_update_model = users_ns.model('UserUpdate', {
     'pincode': fields.String(description='Pincode'),
     'status': fields.Boolean(description='User status')
 })
+pagination_parser = reqparse.RequestParser()
+pagination_parser.add_argument('page', type=int, default=1, help='Page number')
+pagination_parser.add_argument('per_page', type=int, default=25, help='Items per page')
 
 
 @users_ns.route('/<int:user_id>')
@@ -213,3 +216,70 @@ class UserAPI(Resource):
                 'message': 'Error deleting user: ' + str(e)
             }
             return responseObject, 500
+@users_ns.route('/')
+class UserListAPI(Resource):
+
+        @users_ns.expect(pagination_parser)
+        @users_ns.doc(security='Bearer Auth')
+        @users_ns.response(200, 'List of all users')
+        @users_ns.response(401, 'Invalid token')
+        def get(self):
+            """Get all users"""
+            auth_token, responseObject, status_code = extract_auth_token()
+            if responseObject:
+                return responseObject, status_code
+    
+            resp = User.decode_auth_token(auth_token)
+            if not isinstance(resp, str):
+                try:
+                    
+                    page = request.args.get("page", 1, type=int)
+                    per_page = request.args.get("per_page", 25, type=int)
+    
+                # Paginate query
+                    pagination = User.query.paginate(
+                    page=page,
+                    per_page=per_page,
+                    error_out=False
+                ) 
+                    users_list = []
+                    
+                    for user in pagination.items:
+                        users_list.append({
+                            'id': user.id,
+                            'name': user.name,
+                            'email': user.email,
+                            'mobile': user.mobile,
+                            'username': user.username,
+                            'branch_id': user.branch_id,
+                            'role_id': user.role_id,
+                            'country_id': user.country_id,
+                            'state_id': user.state_id,
+                            'address_line_1': user.address_line_1,
+                            'address_line_2': user.address_line_2,
+                            'city_id': user.city_id,
+                            'pincode': user.pincode,
+                            'status': user.status,
+                            'created_at': user.created_at.isoformat() if user.created_at else None,
+                            'updated_at': user.updated_at.isoformat() if user.updated_at else None,
+                        })
+                    
+                    responseObject = {
+                        'status': 'success',
+                        'message': 'Users retrieved successfully',
+                        'data': users_list,
+                        'total': len(users_list)
+                    }
+                    return responseObject, 200
+                except Exception as e:
+                    responseObject = {
+                        'status': 'fail',
+                        'message': 'Error retrieving users: ' + str(e)
+                    }
+                    return responseObject, 500
+            
+            responseObject = {
+                'status': 'fail',
+                'message': resp
+            }
+            return responseObject, 401
