@@ -2,8 +2,9 @@ from flask import request
 from flask_restx import Resource, fields, Namespace, reqparse
 
 from src.server import db
-from src.server.models import User
+from src.server.models import User, Branch, Role, Country, State, City
 from src.server.auth.utility import extract_auth_token
+from src.server.role_permission.utilty import authorize
 
 # Create namespace
 users_ns = Namespace('users', description='User operations')
@@ -51,6 +52,7 @@ class UserAPI(Resource):
     @users_ns.response(200, 'Success', user_model)
     @users_ns.response(401, 'Invalid token')
     @users_ns.response(404, 'User not found')
+    @authorize('users.view')  # Example permission key, adjust as needed
     def get(self, user_id):
         """Get user by user ID"""
         auth_token, responseObject, status_code = extract_auth_token()
@@ -60,8 +62,26 @@ class UserAPI(Resource):
         resp = User.decode_auth_token(auth_token)
         if not isinstance(resp, str):
             try:
-                user = User.query.filter_by(id=user_id).first()
-                if user:
+                user_row = (
+                    db.session.query(
+                        User,
+                        Branch.name.label('branch_name'),
+                        Role.name.label('role_name'),
+                        Country.name.label('country_name'),
+                        State.name.label('state_name'),
+                        City.name.label('city_name'),
+                    )
+                    .outerjoin(Branch, User.branch_id == Branch.id)
+                    .outerjoin(Role, User.role_id == Role.id)
+                    .outerjoin(Country, User.country_id == Country.id)
+                    .outerjoin(State, User.state_id == State.id)
+                    .outerjoin(City, User.city_id == City.id)
+                    .filter(User.id == user_id)
+                    .first()
+                )
+
+                if user_row:
+                    user, branch_name, role_name, country_name, state_name, city_name = user_row
                     responseObject = {
                         'status': 'success',
                         'user_id': user.id,
@@ -70,12 +90,17 @@ class UserAPI(Resource):
                         'mobile': user.mobile,
                         'username': user.username,
                         'branch_id': user.branch_id,
-                        'role_id': user.role_id,
-                        'country_id': user.country_id,
-                        'state_id': user.state_id,
+                        'branch_name': branch_name,
+                        #'role_id': user.role_id,
+                        'role_name': role_name,
+                        #'country_id': user.country_id,
+                        'country_name': country_name,
+                        #'state_id': user.state_id,
+                        'state_name': state_name,
                         'address_line_1': user.address_line_1,
                         'address_line_2': user.address_line_2,
                         'city_id': user.city_id,
+                        'city_name': city_name,
                         'pincode': user.pincode,
                         'status': user.status,
                     }
@@ -178,6 +203,7 @@ class UserAPI(Resource):
     @users_ns.response(200, 'User successfully deleted')
     @users_ns.response(401, 'Invalid token')
     @users_ns.response(404, 'User not found')
+    @authorize('users.delete')  # Example permission key, adjust as needed
     def delete(self, user_id):
         """Delete user by ID"""
         auth_token, responseObject, status_code = extract_auth_token()
@@ -223,6 +249,7 @@ class UserListAPI(Resource):
         @users_ns.doc(security='Bearer Auth')
         @users_ns.response(200, 'List of all users')
         @users_ns.response(401, 'Invalid token')
+        @authorize('users.view')  # Example permission key, adjust as needed
         def get(self):
             """Get all users"""
             auth_token, responseObject, status_code = extract_auth_token()
@@ -232,33 +259,46 @@ class UserListAPI(Resource):
             resp = User.decode_auth_token(auth_token)
             if not isinstance(resp, str):
                 try:
-                    
                     page = request.args.get("page", 1, type=int)
                     per_page = request.args.get("per_page", 25, type=int)
-    
-                # Paginate query
-                    pagination = User.query.paginate(
-                    page=page,
-                    per_page=per_page,
-                    error_out=False
-                ) 
+
+                    pagination = (
+                        db.session.query(
+                            User,
+                            Branch.name.label('branch_name'),
+                            Role.name.label('role_name'),
+                            Country.name.label('country_name'),
+                            State.name.label('state_name'),
+                            City.name.label('city_name'),
+                        )
+                        .outerjoin(Branch, User.branch_id == Branch.id)
+                        .outerjoin(Role, User.role_id == Role.id)
+                        .outerjoin(Country, User.country_id == Country.id)
+                        .outerjoin(State, User.state_id == State.id)
+                        .outerjoin(City, User.city_id == City.id)
+                        .paginate(page=page, per_page=per_page, error_out=False)
+                    )
                     users_list = []
-                    
-                    for user in pagination.items:
+
+                    for user, branch_name, role_name, country_name, state_name, city_name in pagination.items:
                         users_list.append({
                             'id': user.id,
                             'name': user.name,
                             'email': user.email,
                             'mobile': user.mobile,
                             'username': user.username,
-                            'branch_id': user.branch_id,
-                            'role_id': user.role_id,
-                            'country_id': user.country_id,
-                            'state_id': user.state_id,
+                            #'branch_id': user.branch_id,
+                            'branch_name': branch_name,
+                            #'role_id': user.role_id,
+                            'role_name': role_name,
+                            #'country_id': user.country_id,
+                            'country_name': country_name,
+                            #'state_id': user.state_id,
+                            'state_name': state_name,
                             'address_line_1': user.address_line_1,
                             'address_line_2': user.address_line_2,
-                            'city_id': user.city_id,
-                            'pincode': user.pincode,
+                            #'city_id': user.city_id,
+                            'city_name': city_name,
                             'status': user.status,
                             'created_at': user.created_at.isoformat() if user.created_at else None,
                             'updated_at': user.updated_at.isoformat() if user.updated_at else None,
