@@ -4,6 +4,7 @@ from flask_restx import Resource, fields
 from src.server import db
 from src.server.models import Country
 from src.server import countries_ns
+from src.server.role_permission.utilty import authorize
 
 
 # Define Swagger models
@@ -20,6 +21,7 @@ country_model = countries_ns.model('Country', {
 class CountriesAPI(Resource):
     @countries_ns.response(200, 'Success', [country_model])
     @countries_ns.response(500, 'Internal server error')
+    @authorize('countries.view')  # Example permission key, adjust as needed
     def get(self):
         """Get list of all countries"""
         try:
@@ -51,6 +53,7 @@ class CountryDetailAPI(Resource):
     @countries_ns.response(200, 'Success', country_model)
     @countries_ns.response(404, 'Country not found')
     @countries_ns.response(500, 'Internal server error')
+    @authorize('countries.view')  # Example permission key, adjust as needed
     def get(self, country_id):
         """Get a specific country by ID"""
         try:
