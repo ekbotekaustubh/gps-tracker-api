@@ -5,6 +5,7 @@ from flask_restx import Resource, fields, Namespace
 from src.server import db
 from src.server.models import Permission
 import traceback
+from src.server.role_permission.utilty import authorize
 
 
 Permissions_ns = Namespace('permissions', description = "permission operations")
@@ -40,6 +41,7 @@ class PermissionListAPI(Resource):
     @Permissions_ns.response(201, 'Permission created successfully', permission_response_model)
     @Permissions_ns.response(400, 'Invalid input')
     @Permissions_ns.response(409, 'Permission key already exists')
+    @authorize('permission.create')  # Example permission key, adjust as needed
     def post(self):
         """Create a new permission"""
         try:
@@ -102,6 +104,7 @@ class PermissionListAPI(Resource):
     
     @Permissions_ns.response(200,'Success',[permision_model])
     @Permissions_ns.response(500, 'internal server error')    
+    @authorize('permission.view')  # Example permission key, adjust as needed
     def get(self):
         """Get list of all permissions"""
         try:
@@ -131,6 +134,7 @@ class PermissionListAPI(Resource):
         
 @Permissions_ns.route('/<int:permission_id>') 
 class PermissionDetailAPI(Resource):
+    @authorize('permission.view')  # Example permission key, adjust as needed
     @Permissions_ns.response(200, 'Success', permision_model)
     @Permissions_ns.response(404, 'Permission not found')  
     @Permissions_ns.response(500, 'Internal server error')
@@ -163,7 +167,8 @@ class PermissionDetailAPI(Resource):
     @Permissions_ns.expect(permission_input_model)
     @Permissions_ns.response(200, 'Permission updated successfully')
     @Permissions_ns.response(400, 'Invalid input')
-    @Permissions_ns.response(404, 'Permission not found')   
+    @Permissions_ns.response(404, 'Permission not found')  
+    @authorize('permission.update')  # Example permission key, adjust as needed 
     def put(self, permission_id):
         """Update a specific permission by ID"""
         try:
@@ -202,6 +207,7 @@ class PermissionDetailAPI(Resource):
 
     @Permissions_ns.response(200, 'Permission deleted successfully')
     @Permissions_ns.response(404, 'Permission not found')
+    @authorize('permission.delete')  # Example permission key, adjust as needed
     def delete(self, permission_id):
         """Delete a specific permission by ID"""
         try:
