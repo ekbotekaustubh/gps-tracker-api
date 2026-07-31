@@ -3,6 +3,7 @@ from flask_restx import Resource, fields, Namespace
 
 from src.server import db
 from src.server.models import Branch, Organization, Country, State, City
+from src.server.role_permission.utilty import authorize
 #from src.server import branchs_ns
 
 
@@ -76,6 +77,7 @@ class AddBranchAPI(Resource):
     @branchs_ns.expect(branch_input_model)
     @branchs_ns.response(201, 'Branch added successfully', branch_response_model)
     @branchs_ns.response(400, 'Invalid input')
+    @authorize('branches.create')  # Example permission key, adjust as needed
     def post(self):
         """Add a new branch"""
         try:
@@ -144,6 +146,7 @@ class AddBranchAPI(Resource):
 
 
     @branchs_ns.response(200, 'Success')
+    @authorize('branches.view')  # Example permission key, adjust as needed
     def get(self):
         """Get all branches"""
         try:
@@ -178,13 +181,14 @@ class AddBranchAPI(Resource):
                 'message': f'Error retrieving branches: {str(e)}'
             }, 500
 
-    
+      # Example permission key, adjust as needed
 
-
+ # Example permission key, adjust as needed
 @branchs_ns.route('/<int:branch_id>')
 class BranchDetailAPI(Resource):
     @branchs_ns.response(200, 'Success')
     @branchs_ns.response(404, 'Branch not found')
+    @authorize('branches.view')  # Example permission key, adjust as needed
     def get(self, branch_id):
         """Get a branch by ID"""
         try:
@@ -226,6 +230,7 @@ class BranchDetailAPI(Resource):
     @branchs_ns.response(200, 'Branch updated successfully')
     @branchs_ns.response(400, 'Invalid input')
     @branchs_ns.response(404, 'Branch not found')
+    @authorize('branches.update')  # Example permission key, adjust as needed
     def put(self, branch_id):
         """Update branch """
         try:
@@ -297,6 +302,7 @@ class BranchDetailAPI(Resource):
 
     @branchs_ns.response(200, 'Branch deleted successfully')
     @branchs_ns.response(404, 'Branch not found')
+    @authorize('branches.delete')  # Example permission key, adjust as needed
     def delete(self, branch_id):
         """Delete branch"""
         try:
