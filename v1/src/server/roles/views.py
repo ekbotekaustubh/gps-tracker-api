@@ -3,6 +3,7 @@ from flask_restx import Resource, fields, Namespace
 
 from src.server import db
 from src.server.models import Role
+from src.server.role_permission.utilty import authorize
 
 # Swagger Namespace
 roles_ns = Namespace('roles', description='Roles operations')
@@ -24,6 +25,7 @@ class RolesListAPI(Resource):
     @roles_ns.response(201, 'Role created successfully')
     @roles_ns.response(409, 'Role already exists')
     @roles_ns.response(500, 'Internal server error')
+    @authorize('role.create')  # Example permission key, adjust as needed
     def post(self):
         """Create Role"""
 
@@ -66,6 +68,7 @@ class RolesListAPI(Resource):
 
     @roles_ns.response(200, 'Success', [role_model])
     @roles_ns.response(500, 'Internal server error')
+    @authorize('role.view')  # Example permission key, adjust as needed
     def get(self):
         """Get role list or role by name (query param 'name')"""
 
@@ -113,6 +116,7 @@ class RoleAPI(Resource):
     @roles_ns.response(200, 'Success', role_model)
     @roles_ns.response(404, 'role not found')
     @roles_ns.response(500, 'Internal server error')
+    @authorize('role.view')  # Example permission key, adjust as needed
     def get(self, role_id):
         """Get role details by ID"""
         try:
@@ -139,6 +143,7 @@ class RoleAPI(Resource):
     @roles_ns.response(200, 'role updated successfully')
     @roles_ns.response(404, 'role not found')
     @roles_ns.response(500, 'Internal server error')
+    @authorize('role.update')  # Example permission key, adjust as needed
     def put(self, role_id):
         """Update role"""
         post_data = request.get_json()
@@ -162,6 +167,7 @@ class RoleAPI(Resource):
     @roles_ns.response(200, 'role deleted successfully')
     @roles_ns.response(404, 'role not found')
     @roles_ns.response(500, 'Internal server error')
+    @authorize('role.delete')  # Example permission key, adjust as needed
     def delete(self, role_id):
         """Delete role"""
         try:
