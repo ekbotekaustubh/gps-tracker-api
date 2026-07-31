@@ -4,7 +4,7 @@ from flask import request
 from flask_restx import Resource, fields
 
 from src.server import bcrypt, db
-from src.server.models import User, BlacklistToken
+from src.server.models import User, BlacklistToken, Branch, Role, Country, State, City
 from src.server import auth_ns
 
 # Define Swagger models
@@ -153,7 +153,32 @@ class UserAPI(Resource):
 
         resp = User.decode_auth_token(auth_token)
         if not isinstance(resp, str):
-            user = User.query.filter_by(id=resp).first()
+            user_row = (
+                db.session.query(
+                    User,
+                    Branch.name.label('branch_name'),
+                    Role.name.label('role_name'),
+                    Country.name.label('country_name'),
+                    State.name.label('state_name'),
+                    City.name.label('city_name'),
+                )
+                .outerjoin(Branch, User.branch_id == Branch.id)
+                .outerjoin(Role, User.role_id == Role.id)
+                .outerjoin(Country, User.country_id == Country.id)
+                .outerjoin(State, User.state_id == State.id)
+                .outerjoin(City, User.city_id == City.id)
+                .filter(User.id == resp)
+                .first()
+            )
+
+            if not user_row:
+                responseObject = {
+                    'status': 'fail',
+                    'message': 'User not found.'
+                }
+                return responseObject, 404
+
+            user, branch_name, role_name, country_name, state_name, city_name = user_row
             responseObject = {
                 'status': 'success',
                 'user_id': user.id,
@@ -162,9 +187,15 @@ class UserAPI(Resource):
                 'mobile': user.mobile,
                 'username': user.username,
                 'branch_id': user.branch_id,
-                'role_id': user.role_id,
-                'country_id': user.country_id,
-                'state_id': user.state_id,
+                'branch_name': branch_name,
+                #'role_id': user.role_id,
+                'role_name': role_name,
+                #'country_id': user.country_id,
+                'country_name': country_name,
+                #'state_id': user.state_id,
+                'state_name': state_name,
+                #'city_id': user.city_id,
+                'city_name': city_name,
                 'user_status': user.status,
                 'registered_on': user.created_at.isoformat() if user.created_at else None,
             }
