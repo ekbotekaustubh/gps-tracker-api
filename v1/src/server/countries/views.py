@@ -21,6 +21,7 @@ country_model = countries_ns.model('Country', {
 class CountriesAPI(Resource):
     @countries_ns.response(200, 'Success', [country_model])
     @countries_ns.response(500, 'Internal server error')
+    @countries_ns.doc(security='Bearer Auth')
     @authorize('countries.view')  # Example permission key, adjust as needed
     def get(self):
         """Get list of all countries"""
@@ -53,6 +54,7 @@ class CountryDetailAPI(Resource):
     @countries_ns.response(200, 'Success', country_model)
     @countries_ns.response(404, 'Country not found')
     @countries_ns.response(500, 'Internal server error')
+    @countries_ns.doc(security='Bearer Auth')
     @authorize('countries.view')  # Example permission key, adjust as needed
     def get(self, country_id):
         """Get a specific country by ID"""
