@@ -41,6 +41,7 @@ class PermissionListAPI(Resource):
     @Permissions_ns.response(201, 'Permission created successfully', permission_response_model)
     @Permissions_ns.response(400, 'Invalid input')
     @Permissions_ns.response(409, 'Permission key already exists')
+    @Permissions_ns.doc(security='Bearer Auth')
     @authorize('permission.create')  # Example permission key, adjust as needed
     def post(self):
         """Create a new permission"""
@@ -103,7 +104,8 @@ class PermissionListAPI(Resource):
             return responseObject, 500
     
     @Permissions_ns.response(200,'Success',[permision_model])
-    @Permissions_ns.response(500, 'internal server error')    
+    @Permissions_ns.response(500, 'internal server error') 
+    @Permissions_ns.doc(security='Bearer Auth')
     @authorize('permission.view')  # Example permission key, adjust as needed
     def get(self):
         """Get list of all permissions"""
@@ -138,6 +140,7 @@ class PermissionDetailAPI(Resource):
     @Permissions_ns.response(200, 'Success', permision_model)
     @Permissions_ns.response(404, 'Permission not found')  
     @Permissions_ns.response(500, 'Internal server error')
+    @Permissions_ns.doc(security='Bearer Auth')
     def get(self, permission_id):
         """Get a specific permission by ID"""
         try:
@@ -167,7 +170,8 @@ class PermissionDetailAPI(Resource):
     @Permissions_ns.expect(permission_input_model)
     @Permissions_ns.response(200, 'Permission updated successfully')
     @Permissions_ns.response(400, 'Invalid input')
-    @Permissions_ns.response(404, 'Permission not found')  
+    @Permissions_ns.response(404, 'Permission not found')
+    @Permissions_ns.doc(security='Bearer Auth')
     @authorize('permission.update')  # Example permission key, adjust as needed 
     def put(self, permission_id):
         """Update a specific permission by ID"""
@@ -207,6 +211,7 @@ class PermissionDetailAPI(Resource):
 
     @Permissions_ns.response(200, 'Permission deleted successfully')
     @Permissions_ns.response(404, 'Permission not found')
+    @Permissions_ns.doc(security='Bearer Auth')
     @authorize('permission.delete')  # Example permission key, adjust as needed
     def delete(self, permission_id):
         """Delete a specific permission by ID"""
