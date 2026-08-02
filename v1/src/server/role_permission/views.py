@@ -37,6 +37,7 @@ class RolePermissionListAPI(Resource):
     @RolePermissions_ns.response(400, 'Invalid input')
     @RolePermissions_ns.response(404, 'Role or Permission not found')
     @RolePermissions_ns.response(409, 'Role already has this permission')
+    @RolePermissions_ns.doc(security='Bearer Auth')
     @authorize('role_permissions.create')  # Example permission key, adjust as needed
     def post(self):
         """Assign a permission to a role"""
@@ -113,6 +114,7 @@ class RolePermissionListAPI(Resource):
             }, 500
 
     @RolePermissions_ns.response(200, 'List of all role-permission associations')
+    @RolePermissions_ns.doc(security='Bearer Auth')
     @authorize('role_permissions.view')  # Example permission key, adjust as needed
     def get(self):
         """Get all role-permission associations"""
@@ -154,6 +156,7 @@ class RolePermissionListAPI(Resource):
     @RolePermissions_ns.response(200, 'Role permissions updated successfully')
     @RolePermissions_ns.response(400, 'Invalid input')
     @RolePermissions_ns.response(404, 'Role not found')
+    @RolePermissions_ns.doc(security='Bearer Auth')
     @authorize('role_permissions.update')  # Example permission key, adjust as needed
     def put(self):
         """Update all permissions for a role (replaces existing permissions)"""
@@ -234,6 +237,7 @@ class RolePermissionListAPI(Resource):
 class RolePermissionsAPI(Resource):
     @RolePermissions_ns.response(200, 'List of permissions for a role', role_permissions_list_model)
     @RolePermissions_ns.response(404, 'Role not found')
+    @RolePermissions_ns.doc(security='Bearer Auth')
     @authorize('role_permissions.view')  # Example permission key, adjust as needed
     def get(self, role_id):
         """Get all permissions for a specific role"""
@@ -280,6 +284,7 @@ class RolePermissionsAPI(Resource):
 
     @RolePermissions_ns.response(200, 'Permission removed from role successfully')
     @RolePermissions_ns.response(404, 'Role-permission association not found')
+    @RolePermissions_ns.doc(security='Bearer Auth')
     @authorize('role_permissions.delete')  # Example permission key, adjust as needed
     def delete(self, role_id, permission_id):
         """Remove a permission from a role"""
