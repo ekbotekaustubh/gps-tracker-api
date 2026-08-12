@@ -4,6 +4,7 @@ from flask_restx import Resource, fields
 from src.server import db
 from src.server.models import State, City
 from src.server import cities_ns
+from src.server.role_permission.utilty import authorize
 
 
 # Define Swagger models
@@ -22,6 +23,8 @@ class StateCitiesAPI(Resource):
     @cities_ns.response(200, 'Success', [city_model])
     @cities_ns.response(404, 'State not found')
     @cities_ns.response(500, 'Internal server error')
+    @authorize('cities.view') 
+    @cities_ns.doc(security='Bearer Auth')
     def get(self, state_id):
         """Get cities list of a specific state by state ID"""
         try:

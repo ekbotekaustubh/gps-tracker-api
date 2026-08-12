@@ -4,6 +4,7 @@ from flask_restx import Resource, fields, Namespace
 from src.server import db
 from src.server.models import CardMember, Branch, Organization, Country, State, City
 import traceback
+from src.server.role_permission.utilty import authorize
 
 CardMembers_ns = Namespace('card_members', description='Card Members operations')
 
@@ -87,9 +88,11 @@ def serialize_card_member(member, branch_name=None, country_name=None, state_nam
 @CardMembers_ns.route('/')
 class CardMemberListAPI(Resource):
     @CardMembers_ns.expect(card_member_input_model)
+    @CardMembers_ns.doc(security='Bearer Auth')
     @CardMembers_ns.response(201, 'Card member created successfully', card_member_response_model)
     @CardMembers_ns.response(400, 'Invalid input')
     @CardMembers_ns.response(404, 'Branch, Country, State or City not found')
+    @authorize('card_members.create')  # Example permission key, adjust as needed
     def post(self):
         """Add a new card member"""
         try:
@@ -188,6 +191,8 @@ class CardMemberListAPI(Resource):
             }, 500
 
     @CardMembers_ns.response(200, 'List of all card members')
+    @CardMembers_ns.doc(security='Bearer Auth')
+    @authorize('card_members.view')  # Example permission key, adjust as needed
     def get(self):
         """Get all card members"""
         try:
@@ -227,6 +232,8 @@ class CardMemberListAPI(Resource):
 class CardMemberAPI(Resource):
     @CardMembers_ns.response(200, 'Card member details', card_member_response_model)
     @CardMembers_ns.response(404, 'Card member not found')
+    @CardMembers_ns.doc(security='Bearer Auth')
+    @authorize('card_members.view')  # Example permission key, adjust as needed
     def get(self, member_id):
         """Get a specific card member by ID"""
         try:
@@ -266,6 +273,8 @@ class CardMemberAPI(Resource):
     @CardMembers_ns.response(200, 'Card member updated successfully', card_member_response_model)
     @CardMembers_ns.response(404, 'Card member not found')
     @CardMembers_ns.response(400, 'Invalid input')
+    @CardMembers_ns.doc(security='Bearer Auth')
+    @authorize('card_members.update')  # Example permission key, adjust as needed
     def put(self, member_id):
         """Update a card member"""
         try:
@@ -377,6 +386,8 @@ class CardMemberAPI(Resource):
 
     @CardMembers_ns.response(200, 'Card member deleted successfully')
     @CardMembers_ns.response(404, 'Card member not found')
+    @authorize('card_members.delete')
+    @CardMembers_ns.doc(security='Bearer Auth')
     def delete(self, member_id):
         """Delete a card member"""
         try:

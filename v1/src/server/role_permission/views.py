@@ -5,6 +5,7 @@ from flask_restx import Resource, fields, Namespace
 from src.server import db
 from src.server.models import Role, Permission, RolePermission
 import traceback
+from src.server.role_permission.utilty import authorize
 
 RolePermissions_ns = Namespace('role_permissions', description = "role-permission operations")
 
@@ -36,6 +37,8 @@ class RolePermissionListAPI(Resource):
     @RolePermissions_ns.response(400, 'Invalid input')
     @RolePermissions_ns.response(404, 'Role or Permission not found')
     @RolePermissions_ns.response(409, 'Role already has this permission')
+    @RolePermissions_ns.doc(security='Bearer Auth')
+    @authorize('role_permissions.create')  # Example permission key, adjust as needed
     def post(self):
         """Assign a permission to a role"""
         try:
@@ -111,6 +114,8 @@ class RolePermissionListAPI(Resource):
             }, 500
 
     @RolePermissions_ns.response(200, 'List of all role-permission associations')
+    @RolePermissions_ns.doc(security='Bearer Auth')
+    @authorize('role_permissions.view')  # Example permission key, adjust as needed
     def get(self):
         """Get all role-permission associations"""
         try:
@@ -151,6 +156,8 @@ class RolePermissionListAPI(Resource):
     @RolePermissions_ns.response(200, 'Role permissions updated successfully')
     @RolePermissions_ns.response(400, 'Invalid input')
     @RolePermissions_ns.response(404, 'Role not found')
+    @RolePermissions_ns.doc(security='Bearer Auth')
+    @authorize('role_permissions.update')  # Example permission key, adjust as needed
     def put(self):
         """Update all permissions for a role (replaces existing permissions)"""
         try:
@@ -230,6 +237,8 @@ class RolePermissionListAPI(Resource):
 class RolePermissionsAPI(Resource):
     @RolePermissions_ns.response(200, 'List of permissions for a role', role_permissions_list_model)
     @RolePermissions_ns.response(404, 'Role not found')
+    @RolePermissions_ns.doc(security='Bearer Auth')
+    @authorize('role_permissions.view')  # Example permission key, adjust as needed
     def get(self, role_id):
         """Get all permissions for a specific role"""
         try:
@@ -275,6 +284,8 @@ class RolePermissionsAPI(Resource):
 
     @RolePermissions_ns.response(200, 'Permission removed from role successfully')
     @RolePermissions_ns.response(404, 'Role-permission association not found')
+    @RolePermissions_ns.doc(security='Bearer Auth')
+    @authorize('role_permissions.delete')  # Example permission key, adjust as needed
     def delete(self, role_id, permission_id):
         """Remove a permission from a role"""
         try:

@@ -4,6 +4,7 @@ from flask_restx import Resource, fields
 from src.server import db
 from src.server import organizations_ns
 from src.server.models import Organization
+from src.server.role_permission.utilty import authorize
 
 
 # Swagger Model
@@ -30,6 +31,9 @@ class OrganizationsListAPI(Resource):
     @organizations_ns.response(201, 'Organization created successfully')
     @organizations_ns.response(409, 'Organization already exists')
     @organizations_ns.response(500, 'Internal server error')
+    @organizations_ns.doc(security='Bearer Auth')
+    @authorize('organization.create')  # Example permission key, adjust as needed
+    
     def post(self):
         """Create Organization"""
 
@@ -78,6 +82,8 @@ class OrganizationsListAPI(Resource):
 
     @organizations_ns.response(200, 'Success', [organization_model])
     @organizations_ns.response(500, 'Internal server error')
+    @organizations_ns.doc(security='Bearer Auth')
+    @authorize('organizations.view')  # Example permission key, adjust as needed
     def get(self):
         """Get organization list or organization by name (query param 'name')"""
 
@@ -137,6 +143,8 @@ class OrganizationAPI(Resource):
     @organizations_ns.response(200, 'Success', organization_model)
     @organizations_ns.response(404, 'organization not found')
     @organizations_ns.response(500, 'Internal server error')
+    @organizations_ns.doc(security='Bearer Auth')
+    @authorize('organizations.view')  # Example permission key, adjust as needed
     def get(self, organization_id):
         """Get organization details by ID"""
         try:
@@ -169,6 +177,8 @@ class OrganizationAPI(Resource):
     @organizations_ns.response(200, 'organization updated successfully')
     @organizations_ns.response(404, 'organization not found')
     @organizations_ns.response(500, 'Internal server error')
+    @organizations_ns.doc(security='Bearer Auth')
+    @authorize('organizations.update')  # Example permission key, adjust as needed
     def put(self, organization_id):
         """Update organization"""
         post_data = request.get_json()
@@ -198,6 +208,8 @@ class OrganizationAPI(Resource):
     @organizations_ns.response(200, 'organization deleted successfully')
     @organizations_ns.response(404, 'organization not found')
     @organizations_ns.response(500, 'Internal server error')
+    @organizations_ns.doc(security='Bearer Auth')
+    @authorize('organizations.delete')  # Example permission key, adjust as needed
     def delete(self, organization_id):
         """Delete organization"""
         try:
