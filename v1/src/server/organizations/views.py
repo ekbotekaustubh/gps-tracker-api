@@ -11,13 +11,7 @@ from src.server.role_permission.utilty import authorize
 organization_model = organizations_ns.model('Organization', {
     'id': fields.Integer(description='Organization ID'),
     'name': fields.String(required=True, description='Organization Name'),
-    'address_line_1': fields.String(required=True, description='Address Line 1'),
-    'address_line_2': fields.String(description='Address Line 2'),
-    'city': fields.String(required=True, description='City'),
-    'pincode': fields.String(required=True, description='Pincode'),
-    'country_id': fields.Integer(required=True, description='Country ID'),
-    'state_id': fields.Integer(required=True, description='State ID'),
-    'status': fields.Boolean(required=True, description='Status'),
+    'status': fields.Integer(required=True, description='Status'),
     'created_at': fields.DateTime(description='Created At'),
     'updated_at': fields.DateTime(description='Updated At')
 })
@@ -32,8 +26,8 @@ class OrganizationsListAPI(Resource):
     @organizations_ns.response(409, 'Organization already exists')
     @organizations_ns.response(500, 'Internal server error')
     @organizations_ns.doc(security='Bearer Auth')
-    @authorize('organization.create')  # Example permission key, adjust as needed
-    
+    # Example permission key, adjust as needed
+    @authorize('organization.create')
     def post(self):
         """Create Organization"""
 
@@ -53,12 +47,6 @@ class OrganizationsListAPI(Resource):
 
             organization = Organization(
                 name=post_data.get('name'),
-                address_line_1=post_data.get('address_line_1'),
-                address_line_2=post_data.get('address_line_2'),
-                city=post_data.get('city'),
-                pincode=post_data.get('pincode'),
-                country_id=post_data.get('country_id'),
-                state_id=post_data.get('state_id'),
                 status=post_data.get('status')
             )
 
@@ -75,7 +63,8 @@ class OrganizationsListAPI(Resource):
 
         except Exception as e:
             db.session.rollback()
-            responseObject = {'status': 'fail', 'message': 'Some error occurred: ' + str(e)}
+            responseObject = {'status': 'fail',
+                              'message': 'Some error occurred: ' + str(e)}
             return responseObject, 500
         finally:
             db.session.close()
@@ -83,14 +72,16 @@ class OrganizationsListAPI(Resource):
     @organizations_ns.response(200, 'Success', [organization_model])
     @organizations_ns.response(500, 'Internal server error')
     @organizations_ns.doc(security='Bearer Auth')
-    @authorize('organizations.view')  # Example permission key, adjust as needed
+    # Example permission key, adjust as needed
+    @authorize('organizations.view')
     def get(self):
         """Get organization list or organization by name (query param 'name')"""
 
         try:
             organization_name = request.args.get('name')
             if organization_name:
-                organization = Organization.query.filter_by(name=organization_name).first()
+                organization = Organization.query.filter_by(
+                    name=organization_name).first()
                 if not organization:
                     return {'status': 'fail', 'message': 'Organization not found.'}, 404
 
@@ -100,12 +91,6 @@ class OrganizationsListAPI(Resource):
                     'data': {
                         'id': organization.id,
                         'name': organization.name,
-                        'address_line_1': organization.address_line_1,
-                        'address_line_2': organization.address_line_2,
-                        'city': organization.city,
-                        'pincode': organization.pincode,
-                        'country_id': organization.country_id,
-                        'state_id': organization.state_id,
                         'status': organization.status,
                         'created_at': organization.created_at.isoformat() if organization.created_at else None,
                         'updated_at': organization.updated_at.isoformat() if organization.updated_at else None,
@@ -117,12 +102,9 @@ class OrganizationsListAPI(Resource):
                 {
                     'id': org.id,
                     'name': org.name,
-                    'address_line_1': org.address_line_1,
-                    'address_line_2': org.address_line_2,
-                    'city': org.city,
-                    'pincode': org.pincode,
-                    'country_id': org.country_id,
-                    'state_id': org.state_id,
+                    'status': org.status,
+                    'created_at': org.created_at.isoformat() if org.created_at else None,
+                    'updated_at': org.updated_at.isoformat() if org.updated_at else None,
                     'status': org.status,
                     'created_at': org.created_at.isoformat() if org.created_at else None,
                     'updated_at': org.updated_at.isoformat() if org.updated_at else None,
@@ -144,11 +126,13 @@ class OrganizationAPI(Resource):
     @organizations_ns.response(404, 'organization not found')
     @organizations_ns.response(500, 'Internal server error')
     @organizations_ns.doc(security='Bearer Auth')
-    @authorize('organizations.view')  # Example permission key, adjust as needed
+    # Example permission key, adjust as needed
+    @authorize('organizations.view')
     def get(self, organization_id):
         """Get organization details by ID"""
         try:
-            organization = Organization.query.filter_by(id=organization_id).first()
+            organization = Organization.query.filter_by(
+                id=organization_id).first()
             if not organization:
                 return {'status': 'fail', 'message': 'organization not found.'}, 404
 
@@ -158,12 +142,6 @@ class OrganizationAPI(Resource):
                 'data': {
                     'id': organization.id,
                     'name': organization.name,
-                    'address_line_1': organization.address_line_1,
-                    'address_line_2': organization.address_line_2,
-                    'city': organization.city,
-                    'pincode': organization.pincode,
-                    'country_id': organization.country_id,
-                    'state_id': organization.state_id,
                     'status': organization.status,
                     'created_at': organization.created_at.isoformat() if organization.created_at else None,
                     'updated_at': organization.updated_at.isoformat() if organization.updated_at else None
@@ -178,22 +156,18 @@ class OrganizationAPI(Resource):
     @organizations_ns.response(404, 'organization not found')
     @organizations_ns.response(500, 'Internal server error')
     @organizations_ns.doc(security='Bearer Auth')
-    @authorize('organizations.update')  # Example permission key, adjust as needed
+    # Example permission key, adjust as needed
+    @authorize('organizations.update')
     def put(self, organization_id):
         """Update organization"""
         post_data = request.get_json()
         try:
-            organization = Organization.query.filter_by(id=organization_id).first()
+            organization = Organization.query.filter_by(
+                id=organization_id).first()
             if not organization:
                 return {'status': 'fail', 'message': 'organization not found.'}, 404
 
             organization.name = post_data.get('name', organization.name)
-            organization.address_line_1 = post_data.get('address_line_1', organization.address_line_1)
-            organization.address_line_2 = post_data.get('address_line_2', organization.address_line_2)
-            organization.city = post_data.get('city', organization.city)
-            organization.pincode = post_data.get('pincode', organization.pincode)
-            organization.country_id = post_data.get('country_id', organization.country_id)
-            organization.state_id = post_data.get('state_id', organization.state_id)
             organization.status = post_data.get('status', organization.status)
 
             db.session.commit()
@@ -209,11 +183,13 @@ class OrganizationAPI(Resource):
     @organizations_ns.response(404, 'organization not found')
     @organizations_ns.response(500, 'Internal server error')
     @organizations_ns.doc(security='Bearer Auth')
-    @authorize('organizations.delete')  # Example permission key, adjust as needed
+    # Example permission key, adjust as needed
+    @authorize('organizations.delete')
     def delete(self, organization_id):
         """Delete organization"""
         try:
-            organization = Organization.query.filter_by(id=organization_id).first()
+            organization = Organization.query.filter_by(
+                id=organization_id).first()
             if not organization:
                 return {'status': 'fail', 'message': 'organization not found.'}, 404
 

@@ -341,3 +341,41 @@ INSERT INTO `cities` (`id`, `name`, `state_id`, `country_id`) VALUES
 
 INSERT INTO `users` (`id`, `name`, `email`, `mobile`, `branch_id`, `role_id`, `address_line_1`, `address_line_2`, `pincode`, `country_id`, `state_id`, `city_id`, `username`, `password`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'admin', 'admin@email.com', '4565768798', 0, 1, 'string', 'string', '412308', 1, 14, 36, 'admin', '$2b$13$336oUAFra1cg8hzxsSf.6eY9lr6uBGRvCwIXe5wFA/OX2Jhub2n4y', 1, '2026-05-29 18:01:20', '2026-05-29 18:01:20');
+
+-- Seed Permissions
+-- Keys must match every @authorize('...') decorator used across src/server, including
+-- pre-existing naming inconsistencies (e.g. 'organization.create' singular, 'state.view' singular).
+INSERT INTO `permissions` (`name`, `permission_key`, `description`, `status`) VALUES
+('View Branches', 'branches.view', 'Allows viewing branch list and details', 1),
+('Create Branches', 'branches.create', 'Allows creating new branches', 1),
+('Update Branches', 'branches.update', 'Allows modifying existing branches', 1),
+('Delete Branches', 'branches.delete', 'Allows deleting branches', 1),
+('View Card Members', 'card_members.view', 'Allows viewing GPS card member list and details', 1),
+('Create Card Members', 'card_members.create', 'Allows creating new GPS card members', 1),
+('Update Card Members', 'card_members.update', 'Allows modifying existing GPS card members', 1),
+('Delete Card Members', 'card_members.delete', 'Allows deleting GPS card members', 1),
+('View Cities', 'cities.view', 'Allows viewing city reference data', 1),
+('View Countries', 'countries.view', 'Allows viewing country reference data', 1),
+('Create Organizations', 'organization.create', 'Allows creating new organizations', 1),
+('View Organizations', 'organizations.view', 'Allows viewing organizations list and details', 1),
+('Update Organizations', 'organizations.update', 'Allows modifying existing organizations', 1),
+('Delete Organizations', 'organizations.delete', 'Allows deleting organizations', 1),
+('View Permissions', 'permission.view', 'Allows viewing system permissions list', 1),
+('Create Permissions', 'permission.create', 'Allows creating new permissions', 1),
+('Update Permissions', 'permission.update', 'Allows modifying existing permissions', 1),
+('Delete Permissions', 'permission.delete', 'Allows deleting permissions', 1),
+('View Roles', 'role.view', 'Allows viewing system roles list', 1),
+('Create Roles', 'role.create', 'Allows creating new system roles', 1),
+('Update Roles', 'role.update', 'Allows modifying existing roles', 1),
+('Delete Roles', 'role.delete', 'Allows deleting custom roles', 1),
+('View Role Permissions', 'role_permissions.view', 'Allows viewing role-permission assignments', 1),
+('Create Role Permissions', 'role_permissions.create', 'Allows assigning permissions to a role', 1),
+('Update Role Permissions', 'role_permissions.update', 'Allows replacing a role''s permission set', 1),
+('Delete Role Permissions', 'role_permissions.delete', 'Allows removing a permission from a role', 1),
+('View States', 'state.view', 'Allows viewing state reference data', 1),
+('View Users', 'users.view', 'Allows viewing system users list and details', 1),
+('Delete Users', 'users.delete', 'Allows deleting system users from the system', 1);
+
+-- Grant every permission to the Super User role (role id 1, assigned to the seeded admin user)
+INSERT INTO `role_permissions` (`role_id`, `permission_id`)
+SELECT 1, `id` FROM `permissions`;

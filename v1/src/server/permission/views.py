@@ -115,9 +115,9 @@ class PermissionListAPI(Resource):
                 {
                    'id': permision.id,
                     'name':permision.name,
-                    'permision_key':permision.permission_key,
+                    'permission_key':permision.permission_key,
                     'description':permision.description,
-                    'status':permision.status       
+                    'status':permision.status
                 }
                 
                 for permision in permisions

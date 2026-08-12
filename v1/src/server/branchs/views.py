@@ -85,69 +85,68 @@ class AddBranchAPI(Resource):
         auth_token, responseObject, status_code = extract_auth_token()
         if responseObject:
             return responseObject, status_code
-            try:
-                data = request.get_json()
-            
-            
-                required_data = ['org_id', 'name', 'address_line_1', 'city', 'pincode', 'country_id', 'state_id', 'mobile']
-                for field in required_data:
-                    if field not in data or not data[field]:
-                        responseObject = {
-                            'status': 'fail',
-                            'message': f'Missing required field: {field}'
-                        }
-                        return responseObject, 400
-            
-            
-                branch = Branch(
-                    org_id=data['org_id'],
-                    name=data['name'],
-                    address_line_1=data['address_line_1'],
-                    address_line_2=data.get('address_line_2', ''),
-                    city=data['city'],
-                    pincode=data['pincode'],
-                    country_id=data['country_id'],
-                    state_id=data['state_id'],
-                    city_id=data.get('city_id'),
-                    is_head_office=data.get('is_head_office', 0),
-                    mobile=data['mobile'],
-                    phone=data.get('phone', ''),
-                    status=data.get('status', 1)
-                )
-            
-                db.session.add(branch)
-                db.session.commit()
-            
-                responseObject = {
-                    'status': 'success',
-                    'message': 'Branch added successfully',
-                    'data': {
-                        'id': branch.id,
-                        'org_id': branch.org_id,
-                        'name': branch.name,
-                        'address_line_1': branch.address_line_1,
-                        'address_line_2': branch.address_line_2,
-                        'city': branch.city,
-                        'pincode': branch.pincode,
-                        'country_id': branch.country_id,
-                        'state_id': branch.state_id,
-                        'city_id': branch.city_id,
-                        'is_head_office': branch.is_head_office,
-                        'mobile': branch.mobile,
-                        'phone': branch.phone,
-                        'status': branch.status,
-                        'created_at': str(branch.created_at),
-                        'updated_at': str(branch.updated_at),
+
+        try:
+            data = request.get_json()
+
+            required_data = ['org_id', 'name', 'address_line_1', 'city', 'pincode', 'country_id', 'state_id', 'mobile']
+            for field in required_data:
+                if field not in data or not data[field]:
+                    responseObject = {
+                        'status': 'fail',
+                        'message': f'Missing required field: {field}'
                     }
+                    return responseObject, 400
+
+            branch = Branch(
+                org_id=data['org_id'],
+                name=data['name'],
+                address_line_1=data['address_line_1'],
+                address_line_2=data.get('address_line_2', ''),
+                city=data['city'],
+                pincode=data['pincode'],
+                country_id=data['country_id'],
+                state_id=data['state_id'],
+                city_id=data.get('city_id'),
+                is_head_office=data.get('is_head_office', 0),
+                mobile=data['mobile'],
+                phone=data.get('phone', ''),
+                status=data.get('status', 1)
+            )
+
+            db.session.add(branch)
+            db.session.commit()
+
+            responseObject = {
+                'status': 'success',
+                'message': 'Branch added successfully',
+                'data': {
+                    'id': branch.id,
+                    'org_id': branch.org_id,
+                    'name': branch.name,
+                    'address_line_1': branch.address_line_1,
+                    'address_line_2': branch.address_line_2,
+                    'city': branch.city,
+                    'pincode': branch.pincode,
+                    'country_id': branch.country_id,
+                    'state_id': branch.state_id,
+                    'city_id': branch.city_id,
+                    'is_head_office': branch.is_head_office,
+                    'mobile': branch.mobile,
+                    'phone': branch.phone,
+                    'status': branch.status,
+                    'created_at': str(branch.created_at),
+                    'updated_at': str(branch.updated_at),
                 }
-                return responseObject, 201
-            except Exception as e:
-                db.session.rollback()
-                responseObject = {
-                    'status': 'fail',
-                    'message': str(e)
-                }
-                return responseObject, 400
+            }
+            return responseObject, 201
+        except Exception as e:
+            db.session.rollback()
+            responseObject = {
+                'status': 'fail',
+                'message': str(e)
+            }
+            return responseObject, 400
 
 
     @branchs_ns.response(200, 'Success')
