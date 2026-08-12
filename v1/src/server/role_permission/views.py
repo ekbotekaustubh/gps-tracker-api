@@ -233,7 +233,8 @@ class RolePermissionListAPI(Resource):
             }, 500
 
 
-@RolePermissions_ns.route('/<int:role_id>')
+@RolePermissions_ns.route('/<int:role_id>', endpoint='role_permissions_by_role')
+@RolePermissions_ns.route('/<int:role_id>/<int:permission_id>', endpoint='role_permission_item')
 class RolePermissionsAPI(Resource):
     @RolePermissions_ns.response(200, 'List of permissions for a role', role_permissions_list_model)
     @RolePermissions_ns.response(404, 'Role not found')

@@ -14,31 +14,7 @@ class Organization(db.Model):
 
     name = db.Column(db.String(100), nullable=False)
 
-    address_line_1 = db.Column(db.String(255), nullable=False)
-
-    address_line_2 = db.Column(db.String(255))
-
-    city = db.Column(db.String(100), nullable=False)
-
-    pincode = db.Column(db.String(10), nullable=False)
-
-    country_id = db.Column(
-        db.Integer,
-        db.ForeignKey('countries.id'),
-        nullable=False
-    )
-
-    state_id = db.Column(
-        db.Integer,
-        db.ForeignKey('states.id'),
-        nullable=False
-    )
-
-    status = db.Column(
-        db.Boolean,
-        default=True,
-        nullable=False
-    )
+    status = db.Column(db.Integer, nullable=False, default=1)
 
     created_at = db.Column(
         db.DateTime,
