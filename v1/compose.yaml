@@ -1,0 +1,48 @@
+services:
+  mysql:
+    build:
+      context: ./database
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+    volumes:
+      - db_data:/var/lib/mysql
+    expose:
+      - "3306"
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+    working_dir: /usr/src/app
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=change-this-to-a-strong-random-secret
+      - APP_SETTINGS=src.server.config.ProductionConfig_MySQL
+      - DATABASE_URL=mysql+pymysql://root:toor@mysql:3306/gps_tracker
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=mysql
+      - MYSQL_ROOT_PASSWORD=toor
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  db_data:
