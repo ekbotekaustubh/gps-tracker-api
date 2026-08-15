@@ -143,6 +143,7 @@ CREATE TABLE IF NOT EXISTS `card_members` (
     `branch_id` INT NOT NULL,
     `address_line_1` VARCHAR(255) DEFAULT NULL,
     `address_line_2` VARCHAR(255) DEFAULT NULL,
+    `city` VARCHAR(100) DEFAULT NULL, -- Free-text city, kept alongside the city_id reference
     `pincode` VARCHAR(20) DEFAULT NULL,
     `country_id` INT NOT NULL,
     `state_id` INT NOT NULL,
@@ -360,6 +361,8 @@ INSERT INTO `permissions` (`name`, `permission_key`, `description`, `status`) VA
 ('View Organizations', 'organizations.view', 'Allows viewing organizations list and details', 1),
 ('Update Organizations', 'organizations.update', 'Allows modifying existing organizations', 1),
 ('Delete Organizations', 'organizations.delete', 'Allows deleting organizations', 1),
+('View Locations', 'locations.view', 'Allows viewing live GPS locations of card members', 1),
+('Create Locations', 'locations.create', 'Allows GPS devices to submit new location fixes', 1),
 ('View Permissions', 'permission.view', 'Allows viewing system permissions list', 1),
 ('Create Permissions', 'permission.create', 'Allows creating new permissions', 1),
 ('Update Permissions', 'permission.update', 'Allows modifying existing permissions', 1),
