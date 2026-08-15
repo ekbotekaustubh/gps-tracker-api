@@ -90,6 +90,8 @@ from src.server.roles import views as roles_views  # noqa: E402, F401
 from src.server.branchs import views as branchs_views  # noqa: E402, F401
 from src.server.permission import views as permission_views  # noqa: E402, F401
 from src.server.role_permission import views as role_permission_views  # noqa: E402, F401
+from src.server.card_members import views as card_members_views  # noqa: E402, F401
+from src.server.locations import views as locations_views  # noqa: E402, F401
 
 # Explicitly register all namespaces
 api.add_namespace(auth_ns)
@@ -102,3 +104,5 @@ api.add_namespace(roles_views.roles_ns)
 api.add_namespace(branchs_views.branchs_ns)
 api.add_namespace(permission_views.Permissions_ns)
 api.add_namespace(role_permission_views.RolePermissions_ns)
+api.add_namespace(card_members_views.CardMembers_ns)
+api.add_namespace(locations_views.locations_ns)

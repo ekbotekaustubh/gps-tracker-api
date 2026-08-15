@@ -192,12 +192,24 @@ class CardMemberListAPI(Resource):
 
     @CardMembers_ns.response(200, 'List of all card members')
     @CardMembers_ns.doc(security='Bearer Auth')
+    @CardMembers_ns.param('branch_id', 'Filter by branch ID')
+    @CardMembers_ns.param('status', 'Filter by status (0=inactive, 1=active)')
     @authorize('card_members.view')  # Example permission key, adjust as needed
     def get(self):
-        """Get all card members"""
+        """Get all card members, optionally filtered by branch_id and/or status"""
         try:
-            card_members = CardMember.query.all()
-            
+            query = CardMember.query
+
+            branch_id = request.args.get('branch_id')
+            if branch_id:
+                query = query.filter(CardMember.branch_id == branch_id)
+
+            status = request.args.get('status')
+            if status is not None and status != '':
+                query = query.filter(CardMember.status == status)
+
+            card_members = query.all()
+
             result = []
             for member in card_members:
                 branch = Branch.query.get(member.branch_id)
